@@ -7,8 +7,8 @@ import {
   setWorkspace,
 } from '@/store/doric'
 
-import DoricWidgetConfig from '@/components/doric/DoricWidgetConfig.vue';
-import widgets from '@/components/widgets/Widgets';
+import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
+import widgets from '@/components/doric-widgets/Widgets.js';
 import * as predefinedWorkspaces from "@/store/workspaces"
 
 const configMode = ref(false)
@@ -24,10 +24,6 @@ const configure = (widgetId) => {
   configMode.value = !configMode.value
   if (!configMode.value) return
   configWidget.value = widgetId
-  // const newLabel = prompt('Give the widget a new label')
-  // const widget = getWidget(widgetId)
-  // widget.label = newLabel
-  // console.log(widget)
 }
 </script>
 

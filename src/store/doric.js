@@ -1,7 +1,7 @@
 import {
   defineStore
 } from 'pinia';
-import widgetComponents from '@/components/widgets/Widgets';
+import widgetComponents from '@/components/doric-widgets/Widgets';
 
 // WORKSPACE STORE / WIDGETS STATE -----------------------------------------------------------------
 
@@ -101,7 +101,6 @@ const setWorkspace = (newColumns) => {
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
 const getUseDoricOutput = (widgetId, key) => (value) => {
-  console.log("here!")
   const store = useStore();
 
   // Get widgets that are subscribed to our output key on our widget
@@ -118,7 +117,6 @@ const getUseDoricOutput = (widgetId, key) => (value) => {
 
 const getUseDoricInput = (widgetId, key) => {
   const store = useStore();
-  console.log("registering input!")
 
   const widget = store.widgets.find(w => w.id === widgetId);
   if (!widget) {

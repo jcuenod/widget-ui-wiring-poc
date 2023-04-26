@@ -1,6 +1,6 @@
-import TextDisplayWidget from '@/components/widgets/TextDisplayWidget.vue'
-import PassageRefWidget from '@/components/widgets/PassageRefWidget.vue'
-import DictionaryWidget from '@/components/widgets/DictionaryWidget.vue'
+import TextDisplayWidget from '@/components/doric-widgets/TextDisplayWidget.vue'
+import PassageRefWidget from '@/components/doric-widgets/PassageRefWidget.vue'
+import DictionaryWidget from '@/components/doric-widgets/DictionaryWidget.vue'
 
 export default {
   "text-display-widget": {
