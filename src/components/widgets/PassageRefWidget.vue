@@ -1,11 +1,17 @@
 <script setup>
-import { ref } from 'vue'
-const osisRef = ref("")
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   useDoricOutput: Function,
+  useDoricInput: Function
 })
 const setOsisRef = props.useDoricOutput("osisRef")
+const getOsisRef = props.useDoricInput("osisRef")
+
+const osisRef = ref(getOsisRef())
+watch(() => getOsisRef(), (newVal) => {
+  osisRef.value = newVal
+})
 </script>
 
 <template>

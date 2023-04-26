@@ -3,11 +3,11 @@ import { ref, onMounted } from 'vue'
 import {
   getUseDoricInput,
   getUseDoricOutput,
-  workspaceShape,
+  getWorkspaceShape,
   setWorkspace,
-  getWidget,
-  getWidgetIds,
 } from '@/store/doric'
+
+import DoricWidgetConfig from '@/components/doric/DoricWidgetConfig.vue';
 import widgets from '@/components/widgets/Widgets';
 import * as predefinedWorkspaces from "@/store/workspaces"
 
@@ -33,50 +33,25 @@ const configure = (widgetId) => {
 
 <template>
   <div class="nav">
-  <select @change="(e) => workspaceSelected(e)">
-    <option :key="key" v-for="key in Object.keys(predefinedWorkspaces)">{{ key }}</option>
-  </select>
-</div>
+    <select @change="(e) => workspaceSelected(e)">
+      <option :key="key" v-for="key in Object.keys(predefinedWorkspaces)">{{ key }}</option>
+    </select>
+  </div>
 
-<div class="doric-widget-framework">
-  <div class="doric-widget-framework__column" v-for="(column, index) in workspaceShape()" :key="index">
-    <div class="doric-widget-framework__widget" v-for="(widget) in column" :key="widget.id">
-      <header>
+  <div class="doric-widget-framework">
+    <div class="doric-widget-framework__column" v-for="(column, index) in getWorkspaceShape()" :key="index">
+      <div class="doric-widget-framework__widget" v-for="(widget) in column" :key="widget.id">
+        <header>
           <span>
             {{ configMode ? widget.id : widget.label }}
           </span>
           <span class="config-button" v-show="!configMode || configWidget === widget.id">
-            <button @click="() => configure(widget.id)">
-              configure
-            </button>
-            <!-- <button>
-                                                                                                  X
-                                                                                                </button> -->
+            <button @click="() => configure(widget.id)">configure</button>
+            <!-- <button>Remove</button> -->
           </span>
         </header>
         <div v-if="(configMode && configWidget === widget.id)">
-          <div>
-            Label: <input v-model="widget.label" />
-          </div>
-          <div>
-            Inputs
-            <div>
-              <pre>
-
-                  {{ JSON.stringify(getWidget(widget.id), null, 2) }}
-                </pre>
-              <!-- <div v-for="(input, index) in widget.inputs" :key="index">
-                        <div>
-                          <span>{{ input.label }}</span>
-                          <span>
-                            <select v-model="input.type">
-                              <option :key="key" v-for="key in Object.keys(widgets)">{{ key }}</option>
-                            </select>
-                          </span>
-                        </div>
-                      </div> -->
-            </div>
-          </div>
+          <DoricWidgetConfig :widgetId="widget.id" />
         </div>
         <div v-else>
           <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
@@ -97,6 +72,7 @@ const configure = (widgetId) => {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    width: 100%;
 
     >.doric-widget-framework__widget {
       border: 1px solid #000;
