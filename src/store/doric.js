@@ -1,6 +1,7 @@
 import {
   defineStore
 } from 'pinia';
+import widgets from '@/components/widgets/Widgets';
 
 const useStore = defineStore('workspace', {
   state: () => {
@@ -14,6 +15,7 @@ const useStore = defineStore('workspace', {
         column.map(widget => ({
           id: widget.id,
           type: widget.type,
+          label: widget.label,
         }))
       );
     },
@@ -31,6 +33,13 @@ const useStore = defineStore('workspace', {
         )
       );
     },
+    getWidgetInputs: (_, getters) => (widgetId) => {
+      const widget = getters.widgets.find(w => w.id === widgetId);
+      if (!widget) {
+        throw new Error(`Widget with id "${widgetId}" not found`);
+      }
+      return widget.inputs;
+    }
   }
 });
 
@@ -44,21 +53,10 @@ const getUseDoricInput = (widgetId, inputName) => {
   }
 
   // Ensure that the input exists
-  if (!("inputs" in widget)) {
-    widget["inputs"] = {}
-  }
   if (!widget.inputs?.[inputName]) {
-    // const newInputs = {
-    //   ...widget.inputs,
-    //   [inputName]: "",
-    // };
-    // widget.inputs = newInputs
     widget.inputs[inputName] = "";
   }
   // Ensure that the subscription exists for input
-  if (!("subscriptions" in widget)) {
-    widget["subscriptions"] = []
-  }
   if (!widget.subscriptions.find(s => s.inputName === inputName)) {
     widget.subscriptions = [
       ...widget.subscriptions,
@@ -85,7 +83,7 @@ const getUseDoricOutput = (widgetId, outputKey) => (outputValue) => {
 };
 
 // Export reactive workspace from store.workspaceShape
-const workspace = () => {
+const workspaceShape = () => {
   const store = useStore();
   return store.workspaceShape;
 }
@@ -96,7 +94,16 @@ const setWorkspace = (newColumns) => {
   // First check that every widget has "subscriptions" and "inputs" fields
   const validatedNewColumns = newColumns.map(c =>
     c.map(w => {
+      if (!("id" in w)) {
+        throw new Error(`Widget ${w} is missing an id`)
+      }
+      if (!("type" in w)) {
+        throw new Error(`Widget ${w} is missing a type`)
+      }
       const newW = { ...w }
+      if (!("label" in newW)) {
+        newW["label"] = widgets[w.type].defaultLabel || "JHagf"
+      }
       if (!("subscriptions" in newW)) {
         newW["subscriptions"] = []
       }
@@ -119,9 +126,62 @@ const setWorkspace = (newColumns) => {
   }, 0)
 }
 
+const getWidget = (widgetId) => {
+  const store = useStore();
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`);
+  }
+  return widget;
+}
+const getWidgetIds = () => {
+  const store = useStore();
+  return store.widgetIds;
+}
+
+const setWidgetLabel = (widgetId, newLabel) => {
+  const store = useStore();
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`);
+  }
+  widget.label = newLabel;
+}
+const setWidgetSubscriptions = (widgetId, newSubscriptions) => {
+  const store = useStore();
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`);
+  }
+  widget.subscriptions = newSubscriptions;
+}
+const getWidgetInputs = (widgetId) => {
+  const store = useStore();
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`);
+  }
+  // Pair each input to its subscriptions
+  console.log(widget.inputs)
+  const inputs = Object.entries(widget.inputs).map(([inputName, inputValue]) => {
+    const subscriptions = Array.from(widget.subscriptions.find(s => s.inputName === inputName)?.widgetSubscriptions) || [];
+    return {
+      inputName,
+      inputValue,
+      subscriptions,
+    }
+  })
+  return inputs;
+}
+
 export {
   getUseDoricInput,
   getUseDoricOutput,
-  workspace,
+  workspaceShape,
   setWorkspace,
+  setWidgetLabel,
+  setWidgetSubscriptions,
+  getWidgetInputs,
+  getWidget,
+  getWidgetIds,
 }
