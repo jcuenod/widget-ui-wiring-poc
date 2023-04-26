@@ -11,8 +11,7 @@ import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.js';
 import * as predefinedWorkspaces from "@/store/workspaces"
 
-const configMode = ref(false)
-const configWidget = ref(-1)
+const configWidget = ref(false)
 
 onMounted(() => {
   setWorkspace(predefinedWorkspaces["defaultWorkspace"])
@@ -21,8 +20,10 @@ const workspaceSelected = (event) => {
   setWorkspace(predefinedWorkspaces[event.target.value])
 }
 const configure = (widgetId) => {
-  configMode.value = !configMode.value
-  if (!configMode.value) return
+  if (configWidget.value === widgetId) {
+    configWidget.value = false
+    return
+  }
   configWidget.value = widgetId
 }
 </script>
@@ -39,14 +40,14 @@ const configure = (widgetId) => {
       <div class="doric-widget-framework__widget" v-for="(widget) in column" :key="widget.id">
         <header>
           <span>
-            {{ configMode ? widget.id : widget.label }}
+            {{ !configWidget ? widget.label : widget.id }}
           </span>
-          <span class="config-button" v-show="!configMode || configWidget === widget.id">
+          <span class="config-button" v-show="!configWidget || configWidget === widget.id">
             <button @click="() => configure(widget.id)">configure</button>
             <!-- <button>Remove</button> -->
           </span>
         </header>
-        <div v-if="(configMode && configWidget === widget.id)">
+        <div v-if="configWidget === widget.id">
           <DoricWidgetConfig :widgetId="widget.id" />
         </div>
         <div v-else>
