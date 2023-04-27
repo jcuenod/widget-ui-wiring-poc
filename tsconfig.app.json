@@ -10,6 +10,11 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "lib": [
+      "es2019",
+      "DOM"
+    ],
     "allowJs": true,
     "composite": true,
     "baseUrl": ".",
@@ -17,6 +22,7 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "outDir": "/tsc-out"
   }
 }
