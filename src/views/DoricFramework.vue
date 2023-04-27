@@ -37,7 +37,8 @@ const configure = (widgetId) => {
 
   <div class="doric-widget-framework">
     <div class="doric-widget-framework__column" v-for="(column, index) in getWorkspaceShape()" :key="index">
-      <div class="doric-widget-framework__widget" v-for="(widget) in column" :key="widget.id">
+      <div class="doric-widget-framework__widget" :class="{ 'config-mode': configWidget === widget.id }"
+        v-for="(widget) in column" :key="widget.id">
         <header>
           <span>
             {{ !configWidget ? widget.label : widget.id }}
@@ -75,6 +76,10 @@ const configure = (widgetId) => {
       border: 1px solid #000;
       border-radius: 3px;
       margin: 0.2rem;
+
+      &.config-mode {
+        border-color: orange;
+      }
 
       header {
         display: flex;
