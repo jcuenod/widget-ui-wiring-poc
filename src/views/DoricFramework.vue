@@ -17,6 +17,7 @@ onMounted(() => {
   setWorkspace(predefinedWorkspaces["defaultWorkspace"])
 })
 const workspaceSelected = (event) => {
+  configWidget.value = false
   setWorkspace(predefinedWorkspaces[event.target.value])
 }
 const configure = (widgetId) => {
