@@ -9,6 +9,7 @@
       "node",
       "jsdom"
     ],
-    "outDir": "/tsc-out"
+    "outDir": "/tsc-out",
+    "ignoreDeprecations": "5.0",
   }
 }
