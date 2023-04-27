@@ -14,37 +14,52 @@ import widgets from '@/components/doric-widgets/Widgets.ts';
 import * as predefinedWorkspaces from "@/store/workspaces"
 
 const configWidget = ref(false)
+const showWidgetsToAddColumn = ref(-1)
 
 onMounted(() => {
   setWorkspace(predefinedWorkspaces["defaultWorkspace"])
 })
-const workspaceSelected = (event) => {
+
+const selectWorkspace = (event) => {
   configWidget.value = false
+  showWidgetsToAddColumn.value = -1
   setWorkspace(predefinedWorkspaces[event.target.value])
 }
-const configure = (widgetId) => {
+
+const configureWidget = (widgetId) => {
   if (configWidget.value === widgetId) {
     configWidget.value = false
     return
   }
+  showWidgetsToAddColumn.value = -1
   configWidget.value = widgetId
 }
 const removeWidget = (widgetId) => {
   configWidget.value = false
   removeDoricWidget(widgetId)
 }
-const addWidget = (column) => {
+
+const setColumnToAddWidget = (column) => {
+  if (showWidgetsToAddColumn.value === column) {
+    showWidgetsToAddColumn.value = -1
+    return
+  }
+  configWidget.value = false
+  showWidgetsToAddColumn.value = column
+}
+const addWidget = (widgetType, column) => {
   console.log('add widget', column)
   addDoricWidget({
-    id: "new-widget",
-    type: "text-display-widget",
+    id: widgetType.replace("-widget", "-0"),
+    type: widgetType,
   }, column)
+  showWidgetsToAddColumn.value = -1
 }
 </script>
 
 <template>
   <div class="nav">
-    <select @change="(e) => workspaceSelected(e)">
+    <select @change="(e) => selectWorkspace(e)">
       <option :key="key" v-for="key in Object.keys(predefinedWorkspaces)">{{ key }}</option>
     </select>
   </div>
@@ -58,7 +73,7 @@ const addWidget = (column) => {
             {{ !configWidget ? widget.label : widget.id }}
           </span>
           <span class="config-button" v-show="!configWidget || configWidget === widget.id">
-            <button @click="() => configure(widget.id)">configure</button>
+            <button @click="() => configureWidget(widget.id)">configure</button>
             <button @click="() => removeWidget(widget.id)">X</button>
           </span>
         </header>
@@ -71,9 +86,19 @@ const addWidget = (column) => {
         </div>
       </div>
       <div class="add-widget">
-        <button @click="addWidget(index)">
-          +
-        </button>
+        <div>
+          <button v-if="showWidgetsToAddColumn === -1" @click="() => setColumnToAddWidget(index)">
+            +
+          </button>
+          <button v-else-if="showWidgetsToAddColumn === index" @click="() => setColumnToAddWidget(-1)">
+            x
+          </button>
+        </div>
+        <div v-show="showWidgetsToAddColumn === index" class="add-widget-list">
+          <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType" @click="() => addWidget(widgetType, index)">
+            {{ widgets[widgetType].defaultLabel }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -116,8 +141,23 @@ const addWidget = (column) => {
 
     .add-widget {
       display: flex;
-      flex-direction: row;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+
+      .add-widget-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #eee;
+        padding: 0.5rem;
+        margin: 0.2rem;
+        border: 1px solid #000;
+        border-radius: 3px;
+
+        button {
+          margin: 0.2rem;
+        }
+      }
     }
   }
 }
@@ -126,6 +166,7 @@ const addWidget = (column) => {
   display: flex;
   flex-direction: row;
   justify-content: end;
+  padding: 0.5rem;
 }
 
 .config-button {
