@@ -102,4 +102,10 @@ const configure = (widgetId) => {
   flex-direction: row;
   justify-content: end;
 }
+
+.config-button {
+  button {
+    cursor: pointer;
+  }
+}
 </style>
