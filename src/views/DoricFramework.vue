@@ -5,8 +5,9 @@ import {
   getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
-  removeWidget as removeDoricWidget,
+  insertColumn,
   addWidget as addDoricWidget,
+  removeWidget as removeDoricWidget,
 } from '@/store/doric'
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
@@ -101,6 +102,7 @@ const addWidget = (widgetType, column) => {
         </div>
       </div>
     </div>
+    <div class="column-insert"><button @click="insertColumn(getWorkspaceShape().length)">+</button></div>
   </div>
 </template>
 

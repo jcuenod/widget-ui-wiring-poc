@@ -42,6 +42,15 @@ const useStore = defineStore('workspace', {
     }
   },
   actions: {
+    insertColumn(columnIndex: number) {
+      this.columns = [...this.columns.slice(0, columnIndex), [], ...this.columns.slice(columnIndex)]
+    },
+    addWidget(widget: MinimalWidget, column: number) {
+      // Add widget to workspace
+      const validatedWidget = getValidatedWidget(widget)
+      const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, this.widgetIds)
+      this.columns[column] = [...this.columns[column], validatedUniqueWidget]
+    },
     removeWidget(widgetId: string) {
       const widget = this.widgets.find(w => w.id === widgetId)
       if (!widget) {
@@ -55,13 +64,10 @@ const useStore = defineStore('workspace', {
       })
       // Remove widget from workspace and filter out potentially empty columns
       this.columns = this.columns.map(c => c.filter(w => w.id !== widgetId)).filter(c => c.length > 0)
+      if (this.columns.length === 0) {
+        this.columns = [[]]
+      }
     },
-    addWidget(widget: MinimalWidget, column: number) {
-      // Add widget to workspace
-      const validatedWidget = getValidatedWidget(widget)
-      const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, this.widgetIds)
-      this.columns[column] = [...this.columns[column], validatedUniqueWidget]
-    }
   },
   getters: {
     workspaceShape: (state) => {
@@ -192,14 +198,19 @@ const getUseDoricInput = (widgetId: string, key: string) => {
   }
 }
 
-const removeWidget = (widgetId: string) => {
+const insertColumn = (columnIndex: number) => {
   const store = useStore()
-  store.removeWidget(widgetId)
+  store.insertColumn(columnIndex)
 }
 
 const addWidget = (widget: Widget, column: number) => {
   const store = useStore()
   store.addWidget(widget, column)
+}
+
+const removeWidget = (widgetId: string) => {
+  const store = useStore()
+  store.removeWidget(widgetId)
 }
 
 export {
@@ -209,6 +220,7 @@ export {
   setWorkspace,
   getUseDoricInput,
   getUseDoricOutput,
-  removeWidget,
+  insertColumn,
   addWidget,
+  removeWidget,
 }
