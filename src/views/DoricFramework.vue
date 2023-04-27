@@ -5,10 +5,12 @@ import {
   getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
+  removeWidget as removeDoricWidget,
+  addWidget as addDoricWidget,
 } from '@/store/doric'
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
-import widgets from '@/components/doric-widgets/Widgets.js';
+import widgets from '@/components/doric-widgets/Widgets.ts';
 import * as predefinedWorkspaces from "@/store/workspaces"
 
 const configWidget = ref(false)
@@ -26,6 +28,17 @@ const configure = (widgetId) => {
     return
   }
   configWidget.value = widgetId
+}
+const removeWidget = (widgetId) => {
+  configWidget.value = false
+  removeDoricWidget(widgetId)
+}
+const addWidget = (column) => {
+  console.log('add widget', column)
+  addDoricWidget({
+    id: "new-widget",
+    type: "text-display-widget",
+  }, column)
 }
 </script>
 
@@ -46,7 +59,7 @@ const configure = (widgetId) => {
           </span>
           <span class="config-button" v-show="!configWidget || configWidget === widget.id">
             <button @click="() => configure(widget.id)">configure</button>
-            <!-- <button>Remove</button> -->
+            <button @click="() => removeWidget(widget.id)">X</button>
           </span>
         </header>
         <div v-if="configWidget === widget.id">
@@ -56,6 +69,11 @@ const configure = (widgetId) => {
           <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
             :useDoricInput="param => getUseDoricInput(widget.id, param)" />
         </div>
+      </div>
+      <div class="add-widget">
+        <button @click="addWidget(index)">
+          +
+        </button>
       </div>
     </div>
   </div>
@@ -94,6 +112,12 @@ const configure = (widgetId) => {
       >div {
         padding: 0.5rem;
       }
+    }
+
+    .add-widget {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
     }
   }
 }

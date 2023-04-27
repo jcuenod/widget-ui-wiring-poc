@@ -5,14 +5,14 @@ import DictionaryWidget from '@/components/doric-widgets/DictionaryWidget.vue'
 export default {
   "text-display-widget": {
     defaultLabel: "Text Display",
-    widget: TextDisplayWidget
+    widget: TextDisplayWidget as Function
   },
   "passage-ref-widget": {
     defaultLabel: "Passage Reference",
-    widget: PassageRefWidget
+    widget: PassageRefWidget as Function
   },
   "dictionary-widget": {
     defaultLabel: "Dictionary",
-    widget: DictionaryWidget
+    widget: DictionaryWidget as Function
   },
-}
+} as WidgetComponentMap
