@@ -75,7 +75,7 @@ const updateInput = (event, key) => {
             <tr v-for="([key, value]) in Object.entries(widget.inputs)" :key="key">
               <td>{{ key }}</td>
               <td>
-                <input :placeholder="value" @blur="(event) => updateInput(event, key)" />
+                <input :value="value" @blur="(event) => updateInput(event, key)" />
               </td>
               <td>
                 <!-- use checkboxes instead of multi-select -->
