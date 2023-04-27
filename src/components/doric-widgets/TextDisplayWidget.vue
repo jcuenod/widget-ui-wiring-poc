@@ -16,7 +16,7 @@ const randomLemma3 = lemmas.splice(Math.round(Math.random() * (lemmas.length - 1
 </script>
 
 <template>
-  <div>{{ osisRef() || " no osisRef set yet" }}</div>
+  <div>{{ osisRef.value || " no osisRef set yet" }}</div>
   <button @click="setSelectedLemma(randomLemma1)">{{ randomLemma1 }}</button>
   <button @click="setSelectedLemma(randomLemma2)">{{ randomLemma2 }}</button>
   <button @click="setSelectedLemma(randomLemma3)">{{ randomLemma3 }}</button>

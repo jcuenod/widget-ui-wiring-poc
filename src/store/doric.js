@@ -103,6 +103,11 @@ const setWorkspace = (newColumns) => {
 const getUseDoricOutput = (widgetId, key) => (value) => {
   const store = useStore();
 
+  // Unwrap reactive objects
+  if (value?.value) {
+    value = value.value;
+  }
+
   // Get widgets that are subscribed to our output key on our widget
   const widgets = store.getWidgetsSubscribedToWidgetAndKey(widgetId, key);
   // Loop through this filtered list and update each widget's input value
@@ -137,7 +142,14 @@ const getUseDoricInput = (widgetId, key) => {
       }
     ]
   }
-  return () => widget.inputs[key]
+
+  // Return reactive object
+  return {
+    get value() { return widget.inputs[key] },
+    set value(newValue) {
+      widget.inputs[key] = newValue;
+    }
+  }
 };
 
 export {

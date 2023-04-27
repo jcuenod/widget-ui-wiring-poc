@@ -1,22 +1,15 @@
 <script setup>
-import { ref, watch } from 'vue'
-
 const props = defineProps({
   useDoricOutput: Function,
   useDoricInput: Function
 })
 const setOsisRef = props.useDoricOutput("osisRef")
-const getOsisRef = props.useDoricInput("osisRef")
-
-const osisRef = ref(getOsisRef())
-watch(() => getOsisRef(), (newVal) => {
-  osisRef.value = newVal
-})
+const osisRef = props.useDoricInput("osisRef")
 </script>
 
 <template>
   <div>
-    <input type="text" v-model="osisRef" />
+    <input type="text" v-model="osisRef.value" />
     <button @click="setOsisRef(osisRef)">Set osisRef</button>
   </div>
 </template>
