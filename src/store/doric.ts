@@ -150,8 +150,11 @@ const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
   const store = useStore()
 
   // Unwrap reactive objects
-  if (value?.value) {
-    value = value.value
+  if (value instanceof Object && "value" in value) {
+    const inspection = Object.getOwnPropertyDescriptor(value, "value")
+    if ("get" in inspection && "set" in inspection) {
+      value = value.value
+    }
   }
 
   // Get widgets that are subscribed to our output key on our widget
