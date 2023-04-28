@@ -191,7 +191,9 @@ const getUseDoricInput = (widgetId: string, key: string) => {
 
   // Return reactive object
   return {
-    get value() { return widget.inputs[key] },
+    get value() {
+      return widget.inputs[key]
+    },
     set value(newValue) {
       widget.inputs[key] = newValue
     }
