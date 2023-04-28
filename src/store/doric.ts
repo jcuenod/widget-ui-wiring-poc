@@ -151,7 +151,7 @@ const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
 
   // Unwrap reactive objects
   if (value instanceof Object && "value" in value) {
-    const inspection = Object.getOwnPropertyDescriptor(value, "value")
+    const inspection = Object.getOwnPropertyDescriptor(value, "value") || {}
     if ("get" in inspection && "set" in inspection) {
       value = value.value
     }
