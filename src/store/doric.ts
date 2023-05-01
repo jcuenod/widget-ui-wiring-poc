@@ -135,7 +135,6 @@ const setWorkspace = (newColumns: Widget[][]) => {
       const validatedWidget = getValidatedWidget(widget)
       const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, validatedWidgetIds)
       validatedWidgetIds.push(validatedUniqueWidget.id)
-      console.log(validatedWidget, validatedUniqueWidget)
       return validatedUniqueWidget
     })
   )
