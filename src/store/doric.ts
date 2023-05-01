@@ -129,8 +129,14 @@ const setWorkspace = (newColumns: Widget[][]) => {
   const store = useStore()
 
   // First check that every widget has "subscriptions" and "inputs" fields
+  const validatedWidgetIds = []
   const validatedNewColumns = newColumns.map(c =>
-    c.map(getValidatedWidget)
+    c.map(widget => {
+      const validatedWidget = getValidatedWidget(widget)
+      const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, validatedWidgetIds)
+      validatedWidgetIds.push(validatedUniqueWidget.id)
+      return validatedUniqueWidget
+    })
   )
 
   // If we give a whole new workspace, we need
