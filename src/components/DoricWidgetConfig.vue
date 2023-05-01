@@ -33,6 +33,9 @@ const subscribeToAll = (key) => {
   widget.inputs[key].subscriptions = newKeySubscriptions
 }
 
+const toggleShared = (key) => {
+  widget.inputs[key].shared = !widget.inputs[key].shared
+}
 
 const updateInput = (event, key) => {
   widget.inputs[key] = event.target.value
@@ -60,6 +63,7 @@ const updateInput = (event, key) => {
               <th>Key</th>
               <th>Value</th>
               <th>Subscriptions</th>
+              <th>Shared</th>
             </tr>
           </thead>
           <tbody>
@@ -71,7 +75,7 @@ const updateInput = (event, key) => {
               <td>
                 <!-- use checkboxes instead of multi-select -->
                 <span v-for="widgetId in widgetIds" :key="widgetId">
-                  <input type="checkbox" :id="widgetId"
+                  <input type="checkbox" :id="widgetId" class="multi-select"
                     :checked="widget.inputs[key].subscriptions.includes(widgetId)"
                     @change="(event) => toggleSubscription(event, key)" />
                   <label :for="widgetId">
@@ -81,6 +85,14 @@ const updateInput = (event, key) => {
                 <button class="wildcard-subscription"
                   v-show="widget.inputs[key].subscriptions.length === 0"
                   title="Implicit subscription to all widgets" @click="subscribeToAll(key)">✱</button>
+              </td>
+              <td>
+                  <input type="checkbox" :id="widgetId"
+                    :checked="widget.inputs[key].shared"
+                    @change="(event) => toggleShared(key)" />
+                  <label>
+                    shared
+                  </label>
               </td>
             </tr>
           </tbody>
@@ -108,7 +120,7 @@ table {
   }
 }
 
-input[type=checkbox] {
+input[type=checkbox].multi-select {
   display: none;
 
   &+label {

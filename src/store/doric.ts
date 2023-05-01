@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import {
   defineStore
 } from 'pinia'
@@ -205,6 +206,13 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
       subscriptions: [],
     }
   }
+
+  // Every input includes a watcher that might share the input (to the url)
+  watch(() => widget.inputs[key].value, (newValue) => {
+    if (widget.inputs?.[key].shared) {
+      console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
+    }
+  })
 
   // Return reactive object
   return {
