@@ -21,12 +21,12 @@ const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
 }
 
 const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
-  if (widgetIds.includes(w.id)) {
+  if (!w.id || widgetIds.includes(w.id)) {
     const newW = { ...w }
     // Get lowest available id
     const prefix = w.type.replace("-widget", "")
     const ids = widgetIds.filter(id => id.startsWith(prefix)).map(id => parseInt(id.replace(prefix + "-", "")))
-    const newId = Math.max(...ids) + 1
+    const newId = Math.max(-1, ...ids) + 1
     newW["id"] = `${prefix}-${newId}`
     return newW
   }
@@ -135,6 +135,7 @@ const setWorkspace = (newColumns: Widget[][]) => {
       const validatedWidget = getValidatedWidget(widget)
       const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, validatedWidgetIds)
       validatedWidgetIds.push(validatedUniqueWidget.id)
+      console.log(validatedWidget, validatedUniqueWidget)
       return validatedUniqueWidget
     })
   )
