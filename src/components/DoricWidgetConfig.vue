@@ -39,11 +39,6 @@ const subscribeToAll = (key) => {
 const toggleShared = (key) => {
   widget.inputs[key].shared = !widget.inputs[key].shared
 }
-
-const updateInput = (event, key) => {
-  widget.inputs[key] = event.target.value
-}
-
 </script>
 
 <template>
@@ -73,7 +68,7 @@ const updateInput = (event, key) => {
             <tr v-for="key in Object.keys(widget.inputs)" :key="key">
               <td>{{ key }}</td>
               <td>
-                <input :value="widget.inputs[key].value" @blur="(event) => updateInput(event, key)" />
+                <input v-model="widget.inputs[key].value" />
               </td>
               <td>
                 <!-- use checkboxes instead of multi-select -->
