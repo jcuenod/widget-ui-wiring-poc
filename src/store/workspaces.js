@@ -1,13 +1,10 @@
 const simplestWorkspace = [
   [{
-    id: "passage-ref-0",
     type: "passage-ref-widget",
   }, {
-    id: "dictionary-0",
     type: "dictionary-widget",
   }],
   [{
-    id: "text-display-0",
     type: "text-display-widget",
   }]
 ]
