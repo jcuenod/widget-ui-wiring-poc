@@ -232,7 +232,7 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
     }
   }
 
-  // Every input includes a watcher that might share the input (to the url)
+  // Every input includes a watcher that optionally shares the input value (to the url)
   watch(() => widget.inputs[key].value, (newValue) => {
     if (widget.inputs[key].shared) {
       console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
