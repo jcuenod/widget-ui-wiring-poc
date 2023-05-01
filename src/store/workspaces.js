@@ -40,6 +40,7 @@ const defaultWorkspace = [
     type: "passage-ref-widget",
     inputs: {
       "osisRef": {
+        value: "Ps.110.1",
         subscriptions: ["text-display-0"],
       },
     },
@@ -57,6 +58,7 @@ const defaultWorkspace = [
     type: "passage-ref-widget",
     inputs: {
       "osisRef": {
+        value: "Heb.1.1",
         subscriptions: ["text-display-1", "dictionary-0"],
       },
     },
