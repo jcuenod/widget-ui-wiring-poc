@@ -5,6 +5,10 @@ import {
 import widgetComponents from '@/components/doric-widgets/Widgets'
 
 const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
+  if (!i) {
+    return {}
+  }
+
   const validatedInputs: Inputs = {}
   // Ensure that inputs have a value, shared, and subscriptions field, create them if not
   Object.keys(i).forEach(key => {
@@ -209,7 +213,7 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
 
   // Every input includes a watcher that might share the input (to the url)
   watch(() => widget.inputs[key].value, (newValue) => {
-    if (widget.inputs?.[key].shared) {
+    if (widget.inputs[key].shared) {
       console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
     }
   })
