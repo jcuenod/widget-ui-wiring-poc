@@ -16,12 +16,8 @@ const toggleSubscription = (event, key) => {
   const checkbox = event.target
   const checked = checkbox.checked
 
-  // Get subscriptions and find the subscription for this key
-  const subscriptions = [...widget.subscriptions]
-  const sIndex = subscriptions.findIndex(subscription => subscription.key === key)
-
   // Update the subscription's widgetSubscriptions
-  const newKeySubscriptions = [...subscriptions[sIndex].widgetSubscriptions]
+  const newKeySubscriptions = [...widget.inputs[key].subscriptions]
   if (checked) {
     newKeySubscriptions.push(checkbox.id)
   } else {
@@ -30,16 +26,11 @@ const toggleSubscription = (event, key) => {
       newKeySubscriptions.splice(index, 1)
     }
   }
-  subscriptions[sIndex].widgetSubscriptions = newKeySubscriptions
+  widget.inputs[key].subscriptions = newKeySubscriptions
 }
 const subscribeToAll = (key) => {
-  // Get subscriptions and find the subscription for this key
-  const subscriptions = [...widget.subscriptions]
-  const sIndex = subscriptions.findIndex(subscription => subscription.key === key)
-
-  // List of all widgets
   const newKeySubscriptions = [...widgetIds]
-  subscriptions[sIndex].widgetSubscriptions = newKeySubscriptions
+  widget.inputs[key].subscriptions = newKeySubscriptions
 }
 
 
@@ -72,23 +63,23 @@ const updateInput = (event, key) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="([key, value]) in Object.entries(widget.inputs)" :key="key">
+            <tr v-for="key in Object.keys(widget.inputs)" :key="key">
               <td>{{ key }}</td>
               <td>
-                <input :value="value" @blur="(event) => updateInput(event, key)" />
+                <input :value="widget.inputs[key].value" @blur="(event) => updateInput(event, key)" />
               </td>
               <td>
                 <!-- use checkboxes instead of multi-select -->
                 <span v-for="widgetId in widgetIds" :key="widgetId">
                   <input type="checkbox" :id="widgetId"
-                    :checked="widget.subscriptions.find(s => s.key === key)?.widgetSubscriptions.includes(widgetId)"
+                    :checked="widget.inputs[key].subscriptions.includes(widgetId)"
                     @change="(event) => toggleSubscription(event, key)" />
                   <label :for="widgetId">
                     {{ widgetId }}
                   </label>
                 </span>
                 <button class="wildcard-subscription"
-                  v-show="widget.subscriptions.find(s => s.key === key)?.widgetSubscriptions.length === 0"
+                  v-show="widget.inputs[key].subscriptions.length === 0"
                   title="Implicit subscription to all widgets" @click="subscribeToAll(key)">✱</button>
               </td>
             </tr>

@@ -83,7 +83,7 @@ const addWidget = (widgetType, column) => {
         </div>
         <div v-else>
           <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
-            :useDoricInput="param => getUseDoricInput(widget.id, param)" />
+            :useDoricInput="(param, options) => getUseDoricInput(widget.id, param, options)" />
         </div>
       </div>
       <div class="add-widget">

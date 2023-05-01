@@ -3,6 +3,25 @@ import {
 } from 'pinia'
 import widgetComponents from '@/components/doric-widgets/Widgets'
 
+const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
+  const validatedInputs: Inputs = {}
+  // Ensure that inputs have a value, shared, and subscriptions field, create them if not
+  Object.keys(i).forEach(key => {
+    const input = i[key]
+    if (!("value" in input)) {
+      input["value"] = ""
+    }
+    if (!("shared" in input)) {
+      input["shared"] = false
+    }
+    if (!("subscriptions" in input)) {
+      input["subscriptions"] = []
+    }
+    validatedInputs[key] = input
+  })
+  return validatedInputs
+}
+
 const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
   if (!("type" in w)) {
     throw new Error(`Widget ${w} is missing a type`)
@@ -14,9 +33,8 @@ const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
     type: "",
     id: "",
     label: widgetComponents[w.type].defaultLabel,
-    inputs: {},
-    subscriptions: [],
   }, w)
+  newW.inputs = getValidatedInputs(newW.inputs)
   return newW
 }
 
@@ -58,8 +76,9 @@ const useStore = defineStore('workspace', {
       }
       // Remove widget from all subscriptions
       this.widgets.forEach(w => {
-        w.subscriptions.forEach(s => {
-          s.widgetSubscriptions = s.widgetSubscriptions.filter(ws => ws !== widgetId)
+        const inputs = Object.keys(w.inputs)
+        inputs.forEach(key => {
+          inputs[key].subscriptions = inputs[key].subscriptions.filter(ws => ws !== widgetId)
         })
       })
       // Remove widget from workspace and filter out potentially empty columns
@@ -83,22 +102,14 @@ const useStore = defineStore('workspace', {
       return state.columns.flat().map(w => w.id)
     },
     widgets: (state) => {
-      return state.columns.flat() as Widget[]
+      return state.columns.flat()
     },
-    getSubscribedWidgets: (state) => (widgetId: string, key: string) => {
-      // All widgets that listen to the key on this widget
+    getSubscribers: (state) => (widgetId: string, key: string) => {
+      // All widgets with an input key subscribed to widgetId
       return state.columns.flat().filter(w =>
-        w?.subscriptions.find(s =>
-          s.key === key &&
-          (s.widgetSubscriptions.includes(widgetId) || s.widgetSubscriptions.length === 0)
-        )
-      )
-    },
-    getWidgetsSubscribedToWidgetAndKey: (state) => (widgetId: string, key: string) => {
-      return state.columns.flat().filter(w =>
-        w?.subscriptions.find(s =>
-          s.key === key &&
-          (s.widgetSubscriptions.includes(widgetId) || s.widgetSubscriptions.length === 0)
+        key in w.inputs && (
+          w.inputs[key].subscriptions.includes(widgetId)
+          || w.inputs[key].subscriptions.length === 0 // Implicit subscription
         )
       )
     },
@@ -164,18 +175,21 @@ const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
   }
 
   // Get widgets that are subscribed to our output key on our widget
-  const widgets = store.getWidgetsSubscribedToWidgetAndKey(widgetId, key)
+  const widgets = store.getSubscribers(widgetId, key)
   // Loop through this filtered list and update each widget's input value
   widgets.forEach(w => {
     if (!(key in (w?.inputs || {}))) {
       console.error(`Widget subscribes to "${key}" but has no listener. This may be a mistake in the workspace configuration or the widget is missing a 'useDoricInput' declaration.`)
       return
     }
-    w.inputs[key] = value
+    w.inputs[key].value = value
   })
 }
 
-const getUseDoricInput = (widgetId: string, key: string) => {
+type UseDoricInputOptions = {
+  shared?: boolean
+}
+const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputOptions) => {
   const store = useStore()
 
   const widget = store.widgets.find(w => w.id === widgetId)
@@ -185,26 +199,20 @@ const getUseDoricInput = (widgetId: string, key: string) => {
 
   // Ensure that the input exists
   if (!widget.inputs?.[key]) {
-    widget.inputs[key] = ""
-  }
-  // Ensure that the subscription exists for input
-  if (!widget.subscriptions.find(s => s.key === key)) {
-    widget.subscriptions = [
-      ...widget.subscriptions,
-      {
-        key,
-        widgetSubscriptions: [],
-      }
-    ]
+    widget.inputs[key] = {
+      value: "",
+      shared: options?.shared || false,
+      subscriptions: [],
+    }
   }
 
   // Return reactive object
   return {
     get value() {
-      return widget.inputs[key]
+      return widget.inputs[key].value
     },
     set value(newValue) {
-      widget.inputs[key] = newValue
+      widget.inputs[key].value = newValue
     }
   }
 }
