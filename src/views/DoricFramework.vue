@@ -81,7 +81,7 @@ const addWidget = (widgetType, column) => {
         <div v-if="configWidget === widget.id">
           <DoricWidgetConfig :widgetId="widget.id" />
         </div>
-        <div v-else>
+        <div :class="{ 'hidden': configWidget === widget.id }">
           <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
             :useDoricInput="(param, options) => getUseDoricInput(widget.id, param, options)" />
         </div>
@@ -138,6 +138,9 @@ const addWidget = (widgetType, column) => {
 
       >div {
         padding: 0.5rem;
+      }
+      .hidden {
+        display: none;
       }
     }
 
