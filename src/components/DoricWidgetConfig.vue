@@ -90,9 +90,6 @@ const updateInput = (event, key) => {
                   <input type="checkbox" :id="widgetId"
                     :checked="widget.inputs[key].shared"
                     @change="(event) => toggleShared(key)" />
-                  <label>
-                    shared
-                  </label>
               </td>
             </tr>
           </tbody>
