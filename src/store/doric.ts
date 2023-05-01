@@ -4,57 +4,6 @@ import {
 } from 'pinia'
 import widgetComponents from '@/components/doric-widgets/Widgets'
 
-const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
-  if (!i) {
-    return {}
-  }
-
-  const validatedInputs: Inputs = {}
-  // Ensure that inputs have a value, shared, and subscriptions field, create them if not
-  Object.keys(i).forEach(key => {
-    const input = i[key]
-    if (!("value" in input)) {
-      input["value"] = ""
-    }
-    if (!("shared" in input)) {
-      input["shared"] = false
-    }
-    if (!("subscriptions" in input)) {
-      input["subscriptions"] = []
-    }
-    validatedInputs[key] = input
-  })
-  return validatedInputs
-}
-
-const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
-  if (!("type" in w)) {
-    throw new Error(`Widget ${w} is missing a type`)
-  }
-  if (!(w.type in widgetComponents)) {
-    throw new Error(`Widget ${w} has an invalid type: ${w.type}`)
-  }
-  const newW: Widget = Object.assign({
-    type: "",
-    id: "",
-    label: widgetComponents[w.type].defaultLabel,
-  }, w)
-  newW.inputs = getValidatedInputs(newW.inputs)
-  return newW
-}
-
-const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
-  if (!w.id || widgetIds.includes(w.id)) {
-    const newW = { ...w }
-    // Get lowest available id
-    const prefix = w.type.replace("-widget", "")
-    const ids = widgetIds.filter(id => id.startsWith(prefix)).map(id => parseInt(id.replace(prefix + "-", "")))
-    const newId = Math.max(-1, ...ids) + 1
-    newW["id"] = `${prefix}-${newId}`
-    return newW
-  }
-  return w
-}
 
 // WORKSPACE STORE / WIDGETS STATE -----------------------------------------------------------------
 
@@ -121,24 +70,67 @@ const useStore = defineStore('workspace', {
   }
 })
 
+
+// VALIDATION -------------------------------------------------------------------------------------
+
+const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
+  if (!i) {
+    return {}
+  }
+
+  const validatedInputs: Inputs = {}
+  // Ensure that inputs have a value, shared, and subscriptions field, create them if not
+  Object.keys(i).forEach(key => {
+    const input = i[key]
+    if (!("value" in input)) {
+      input["value"] = ""
+    }
+    if (!("shared" in input)) {
+      input["shared"] = false
+    }
+    if (!("subscriptions" in input)) {
+      input["subscriptions"] = []
+    }
+    validatedInputs[key] = input
+  })
+  return validatedInputs
+}
+
+const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
+  if (!("type" in w)) {
+    throw new Error(`Widget ${w} is missing a type`)
+  }
+  if (!(w.type in widgetComponents)) {
+    throw new Error(`Widget ${w} has an invalid type: ${w.type}`)
+  }
+  const newW: Widget = Object.assign({
+    type: "",
+    id: "",
+    label: widgetComponents[w.type].defaultLabel,
+  }, w)
+  newW.inputs = getValidatedInputs(newW.inputs)
+  return newW
+}
+
+const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
+  if (!w.id || widgetIds.includes(w.id)) {
+    const newW = { ...w }
+    // Get lowest available id
+    const prefix = w.type.replace("-widget", "")
+    const ids = widgetIds.filter(id => id.startsWith(prefix)).map(id => parseInt(id.replace(prefix + "-", "")))
+    const newId = Math.max(-1, ...ids) + 1
+    newW["id"] = `${prefix}-${newId}`
+    return newW
+  }
+  return w
+}
+
+
 // WORKSPACE --------------------------------------------------------------------------------------
 
 const getWorkspaceShape = () => {
   const store = useStore()
   return store.workspaceShape
-}
-
-const getWidget = (widgetId: string) => {
-  const store = useStore()
-  const widget = store.widgets.find(w => w.id === widgetId)
-  if (!widget) {
-    throw new Error(`Widget with id "${widgetId}" not found`)
-  }
-  return widget
-}
-const getWidgetIds = () => {
-  const store = useStore()
-  return store.widgetIds
 }
 
 const setWorkspace = (newColumns: Widget[][]) => {
@@ -165,6 +157,35 @@ const setWorkspace = (newColumns: Widget[][]) => {
     store.columns = validatedNewColumns
   }, 0)
 }
+
+const insertColumn = (columnIndex: number) => {
+  const store = useStore()
+  store.insertColumn(columnIndex)
+}
+
+const getWidget = (widgetId: string) => {
+  const store = useStore()
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`)
+  }
+  return widget
+}
+const getWidgetIds = () => {
+  const store = useStore()
+  return store.widgetIds
+}
+
+const addWidget = (widget: Widget, column: number) => {
+  const store = useStore()
+  store.addWidget(widget, column)
+}
+
+const removeWidget = (widgetId: string) => {
+  const store = useStore()
+  store.removeWidget(widgetId)
+}
+
 
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
@@ -229,20 +250,8 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
   }
 }
 
-const insertColumn = (columnIndex: number) => {
-  const store = useStore()
-  store.insertColumn(columnIndex)
-}
 
-const addWidget = (widget: Widget, column: number) => {
-  const store = useStore()
-  store.addWidget(widget, column)
-}
-
-const removeWidget = (widgetId: string) => {
-  const store = useStore()
-  store.removeWidget(widgetId)
-}
+// EXPORTS ---------------------------------------------------------------------------------------
 
 export {
   getWorkspaceShape,
