@@ -40,9 +40,14 @@ const useStore = defineStore('workspace', {
         this.columns = [[]]
       }
     },
-    syncToRouter() {
+    syncToRouter(widgetId, key, value) {
       console.log("Syncing workspace to router")
-      console.log(this.router)
+      this.router.replace({
+        query: {
+          ...(this.router.currentRoute.value?.query || {}),
+          [`${widgetId}.${key}`]: value,
+        }
+      })
     },
   },
   getters: {
@@ -233,8 +238,7 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
   watch(() => widget.inputs[key].value, (newValue) => {
     if (widget.inputs[key].shared) {
       console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
-      store.syncToRouter()
-      // router.replace({ query: { ...router.query, [key]: newValue } })
+      store.syncToRouter(widgetId, key, newValue)
     }
   })
 
