@@ -10,7 +10,11 @@ type WidgetComponentMap = {
 type WidgetId = string
 
 type MinimalInputs = {
-  [key: string]: Input
+  [key: string]: {
+    value?: string
+    shared?: boolean
+    subscriptions: WidgetId[]
+  }
 }
 
 type Inputs = {
@@ -25,7 +29,7 @@ type MinimalWidget = {
   type: string
   id?: WidgetId
   label?: string
-  inputs?: { [key: string]: Input }
+  inputs?: MinimalInputs
 }
 
 type Widget = {

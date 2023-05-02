@@ -30,9 +30,8 @@ const useStore = defineStore('workspace', {
       }
       // Remove widget from all subscriptions
       this.widgets.forEach(w => {
-        const inputs = Object.keys(w.inputs)
-        inputs.forEach(key => {
-          inputs[key].subscriptions = inputs[key].subscriptions.filter(ws => ws !== widgetId)
+        Object.keys(w.inputs).forEach(key => {
+          widget.inputs[key].subscriptions = widget.inputs[key].subscriptions.filter(ws => ws !== widgetId)
         })
       })
       // Remove widget from workspace and filter out potentially empty columns
@@ -81,35 +80,29 @@ const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
   const validatedInputs: Inputs = {}
   // Ensure that inputs have a value, shared, and subscriptions field, create them if not
   Object.keys(i).forEach(key => {
-    const input = i[key]
-    if (!("value" in input)) {
-      input["value"] = ""
-    }
-    if (!("shared" in input)) {
-      input["shared"] = false
-    }
-    if (!("subscriptions" in input)) {
-      input["subscriptions"] = []
-    }
-    validatedInputs[key] = input
+    validatedInputs[key] = Object.assign({
+      value: "",
+      shared: false,
+      subscriptions: [],
+    }, i[key])
   })
-  return validatedInputs
+  return validatedInputs as Inputs
 }
 
 const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
-  if (!("type" in w)) {
-    throw new Error(`Widget ${w} is missing a type`)
+  if (!w.type || typeof w.type !== "string") {
+    throw new Error(`Widget ${w} is missing a type or the type is invalid: ${w.type}`)
   }
   if (!(w.type in widgetComponents)) {
     throw new Error(`Widget ${w} has an invalid type: ${w.type}`)
   }
-  const newW: Widget = Object.assign({
-    type: "",
-    id: "",
-    label: widgetComponents[w.type].defaultLabel,
-  }, w)
-  newW.inputs = getValidatedInputs(newW.inputs)
-  return newW
+  
+  return {
+    type: w.type,
+    id: w.id || "",
+    label: w.label || widgetComponents[w.type].defaultLabel,
+    inputs: getValidatedInputs(w.inputs || {}),
+  } as Widget
 }
 
 const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
@@ -137,7 +130,7 @@ const setWorkspace = (newColumns: Widget[][]) => {
   const store = useStore()
 
   // First check that every widget has "subscriptions" and "inputs" fields
-  const validatedWidgetIds = []
+  const validatedWidgetIds: string[] = []
   const validatedNewColumns = newColumns.map(c =>
     c.map(widget => {
       const validatedWidget = getValidatedWidget(widget)
