@@ -31,7 +31,7 @@ const useStore = defineStore('workspace', {
       // Remove widget from all subscriptions
       this.widgets.forEach(w => {
         Object.keys(w.inputs).forEach(key => {
-          widget.inputs[key].subscriptions = widget.inputs[key].subscriptions.filter(ws => ws !== widgetId)
+          w.inputs[key].subscriptions = w.inputs[key].subscriptions.filter(ws => ws !== widgetId)
         })
       })
       // Remove widget from workspace and filter out potentially empty columns
@@ -39,6 +39,10 @@ const useStore = defineStore('workspace', {
       if (this.columns.length === 0) {
         this.columns = [[]]
       }
+    },
+    syncToRouter() {
+      console.log("Syncing workspace to router")
+      console.log(this.router)
     },
   },
   getters: {
@@ -229,6 +233,8 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
   watch(() => widget.inputs[key].value, (newValue) => {
     if (widget.inputs[key].shared) {
       console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
+      store.syncToRouter()
+      // router.replace({ query: { ...router.query, [key]: newValue } })
     }
   })
 
