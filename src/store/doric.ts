@@ -41,10 +41,10 @@ const useStore = defineStore('workspace', {
       }
     },
     syncToRouter(widgetId, key, value) {
-      console.log("Syncing workspace to router")
+      console.log("Syncing workspace to router:", this.router.currentRoute?.query)
       this.router.replace({
         query: {
-          ...(this.router.currentRoute.value?.query || {}),
+          ...(this.router.currentRoute?.query || {}),
           [`${widgetId}.${key}`]: value,
         }
       })
