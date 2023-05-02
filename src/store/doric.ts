@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import {
   defineStore
 } from 'pinia'
+import type { Router } from 'vue-router'
 import widgetComponents from '@/components/doric-widgets/Widgets'
 
 
@@ -10,6 +11,7 @@ import widgetComponents from '@/components/doric-widgets/Widgets'
 const useStore = defineStore('workspace', {
   state: () => {
     return {
+      router: null as null | Router,
       columns: [] as Workspace,
     }
   },
@@ -40,14 +42,18 @@ const useStore = defineStore('workspace', {
         this.columns = [[]]
       }
     },
-    syncToRouter(widgetId, key, value) {
-      console.log("Syncing workspace to router:", this.router.currentRoute?.query)
-      this.router.replace({
-        query: {
-          ...(this.router.currentRoute?.query || {}),
-          [`${widgetId}.${key}`]: value,
-        }
-      })
+    syncToRouter(widgetId: WidgetId, key: string, value: string) {
+      if (this?.router) {
+        this.router.replace({
+          query: {
+            ...(this.router.currentRoute?.query || {}),
+            [`${widgetId}.${key}`]: value,
+          }
+        })
+      }
+      else {
+        console.warn("Router not found, cannot sync workspace to router")
+      }
     },
   },
   getters: {
