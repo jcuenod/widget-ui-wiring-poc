@@ -141,7 +141,7 @@ const getWorkspaceShape = () => {
   return store.workspaceShape
 }
 
-const setWorkspace = (newColumns: Widget[][]) => {
+const setWorkspace = (newColumns: Widget[][]) => new Promise((resolve)=>{
   const store = useStore()
 
   // First check that every widget has "subscriptions" and "inputs" fields
@@ -163,8 +163,9 @@ const setWorkspace = (newColumns: Widget[][]) => {
   store.columns = []
   setTimeout(() => {
     store.columns = validatedNewColumns
+    resolve()
   }, 0)
-}
+})
 
 const insertColumn = (columnIndex: number) => {
   const store = useStore()
