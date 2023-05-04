@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import {
   getUseDoricInput,
   getUseDoricOutput,
@@ -15,8 +15,9 @@ import { useRouter } from 'vue-router'
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
-import * as predefinedWorkspaces from "@/store/workspaces"
+import workspaces from "@/store/workspaces"
 
+const activeWorkspace = ref("default")
 const configWidget = ref(false)
 const showWidgetsToAddColumn = ref(-1)
 
@@ -24,7 +25,7 @@ onMounted(() => {
   // We need the workspace to be set up before we can populate the widget inputs
   const router = useRouter()
   router.isReady().then(() => {
-    return setWorkspace(predefinedWorkspaces["defaultWorkspace"])
+    return setWorkspace(workspaces["defaultWorkspace"])
   }).then(() => {
     const widgetIds = new Set(getWidgetIds())
     const workspaceState = Object.entries(router.currentRoute.value.query)
@@ -38,11 +39,11 @@ onMounted(() => {
   })
 })
 
-const selectWorkspace = (event) => {
+watch(activeWorkspace, (workspace) => {
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
-  setWorkspace(predefinedWorkspaces[event.target.value])
-}
+  setWorkspace(workspaces[workspace])
+})
 
 const configureWidget = (widgetId) => {
   if (configWidget.value === widgetId) {
@@ -77,8 +78,8 @@ const addWidget = (widgetType, column) => {
 
 <template>
   <div class="nav">
-    <select @change="(e) => selectWorkspace(e)">
-      <option :key="key" v-for="key in Object.keys(predefinedWorkspaces)">{{ key }}</option>
+    <select v-model="activeWorkspace">
+      <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
     </select>
   </div>
 
