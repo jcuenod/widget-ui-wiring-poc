@@ -12,6 +12,7 @@ import {
   removeWidget as removeDoricWidget,
 } from '@/store/doric'
 import { useRouter } from 'vue-router'
+const router = useRouter()
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
@@ -23,10 +24,17 @@ const showWidgetsToAddColumn = ref(-1)
 
 onMounted(() => {
   // We need the workspace to be set up before we can populate the widget inputs
-  const router = useRouter()
   router.isReady().then(() => {
-    return setWorkspace(workspaces["defaultWorkspace"])
-  }).then(() => {
+    const currentWorkspace = router.currentRoute.value.query.workspace
+    activeWorkspace.value = currentWorkspace
+  })
+})
+
+watch(activeWorkspace, (newActiveWorkspace) => {
+  console.log("activeWorkspace", newActiveWorkspace)
+  configWidget.value = false
+  showWidgetsToAddColumn.value = -1
+  setWorkspace(workspaces[newActiveWorkspace]).then(() => {
     const widgetIds = new Set(getWidgetIds())
     const workspaceState = Object.entries(router.currentRoute.value.query)
     workspaceState.forEach(([scopedKey, value]) => {
@@ -37,12 +45,14 @@ onMounted(() => {
       getWidget(widgetId).inputs[key].value = value
     })
   })
-})
-
-watch(activeWorkspace, (workspace) => {
-  configWidget.value = false
-  showWidgetsToAddColumn.value = -1
-  setWorkspace(workspaces[workspace])
+  router.isReady().then(() => {
+    router.push({
+      query: {
+        ...router.currentRoute.value.query,
+        workspace: newActiveWorkspace,
+      }
+    })
+  })
 })
 
 const configureWidget = (widgetId) => {
@@ -67,7 +77,6 @@ const setColumnToAddWidget = (column) => {
   showWidgetsToAddColumn.value = column
 }
 const addWidget = (widgetType, column) => {
-  console.log('add widget', column)
   addDoricWidget({
     id: widgetType.replace("-widget", "-0"),
     type: widgetType,
