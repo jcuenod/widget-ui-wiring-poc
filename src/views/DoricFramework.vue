@@ -6,6 +6,7 @@ import {
   getWorkspaceShape,
   setWorkspace,
   insertColumn,
+  getWidgetIds,
   getWidget,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
@@ -25,9 +26,13 @@ onMounted(() => {
   router.isReady().then(() => {
     return setWorkspace(predefinedWorkspaces["defaultWorkspace"])
   }).then(() => {
+    const widgetIds = new Set(getWidgetIds())
     const workspaceState = Object.entries(router.currentRoute.value.query)
     workspaceState.forEach(([scopedKey, value]) => {
       const [widgetId, key] = scopedKey.split('.')
+      if (!widgetIds.has(widgetId)) {
+        return
+      }
       getWidget(widgetId).inputs[key].value = value
     })
   })
