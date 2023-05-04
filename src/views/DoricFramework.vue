@@ -31,7 +31,6 @@ onMounted(() => {
 })
 
 watch(activeWorkspace, (newActiveWorkspace) => {
-  console.log("activeWorkspace", newActiveWorkspace)
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
   setWorkspace(workspaces[newActiveWorkspace]).then(() => {
@@ -42,7 +41,11 @@ watch(activeWorkspace, (newActiveWorkspace) => {
       if (!widgetIds.has(widgetId)) {
         return
       }
-      getWidget(widgetId).inputs[key].value = value
+      const widget = getWidget(widgetId)
+      if (!(key in widget.inputs)) {
+        return
+      }
+      widget.inputs[key].value = value
     })
   })
   router.isReady().then(() => {
