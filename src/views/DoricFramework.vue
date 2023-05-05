@@ -18,19 +18,22 @@ import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
 import workspaces from "@/store/workspaces"
 
-const activeWorkspace = ref("default")
+const activeWorkspace = ref(null)
 const configWidget = ref(false)
 const showWidgetsToAddColumn = ref(-1)
 
 onMounted(() => {
   // We need the workspace to be set up before we can populate the widget inputs
   router.isReady().then(() => {
-    const currentWorkspace = router.currentRoute.value.query.workspace
+    const currentWorkspace = router.currentRoute.value.query.workspace || "default"
     activeWorkspace.value = currentWorkspace
   })
 })
 
 watch(activeWorkspace, (newActiveWorkspace) => {
+  if (!newActiveWorkspace || !(newActiveWorkspace in workspaces)) {
+    return
+  }
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
   setWorkspace(workspaces[newActiveWorkspace]).then(() => {
