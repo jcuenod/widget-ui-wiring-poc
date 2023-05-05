@@ -1,5 +1,5 @@
 const workspaces = {
-  simplestWorkspace: [
+  simplest: [
     [{
       type: "passage-ref-widget",
     }, {
@@ -10,7 +10,7 @@ const workspaces = {
     }]
   ],
 
-  simpleWorkspace: [
+  simple: [
     [{
       id: "passage-ref-0",
       type: "passage-ref-widget",
@@ -31,7 +31,7 @@ const workspaces = {
     }]
   ],
 
-  defaultWorkspace: [
+  default: [
     [{
       id: "passage-ref-0",
       type: "passage-ref-widget",
@@ -78,43 +78,6 @@ const workspaces = {
       },
     }],
   ],
-
-  workspaceWithoutDictionary: [
-    [{
-      id: "passage-ref-0",
-      type: "passage-ref-widget",
-      inputs: {
-        "osisRef": {
-          subscriptions: ["text-display-0"],
-        },
-      },
-    }, {
-      id: "text-display-0",
-      type: "text-display-widget",
-      inputs: {
-        "osisRef": {
-          subscriptions: ["passage-ref-0"],
-        },
-      },
-    }],
-    [{
-      id: "passage-ref-1",
-      type: "passage-ref-widget",
-      inputs: {
-        "osisRef": {
-          subscriptions: ["passage-ref-1", "dictionary-0"],
-        },
-      },
-    }, {
-      id: "text-display-1",
-      type: "text-display-widget",
-      inputs: {
-        "osisRef": {
-          subscriptions: ["passage-ref-1"],
-        },
-      },
-    }]
-  ]
 }
 
 export default workspaces
