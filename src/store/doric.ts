@@ -55,6 +55,16 @@ const useStore = defineStore('workspace', {
         console.warn("Router not found, cannot sync workspace to router")
       }
     },
+    removeFromRouter(widgetId: WidgetId, key: string) {
+      if (this?.router) { 
+        const query = { ...this.router.currentRoute?.query }
+        delete query[`${widgetId}.${key}`]
+        this.router.replace({ query })
+      }
+      else {
+        console.warn("Router not found, cannot remove workspace from router")
+      }
+    },
   },
   getters: {
     workspaceShape: (state) => {
@@ -246,6 +256,15 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
     if (widget.inputs[key].shared) {
       console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
       store.syncToRouter(widgetId, key, newValue)
+    }
+  })
+  // Add and remove input to/from router when shared is toggled
+  watch(() => widget.inputs[key].shared, () => {
+    if (widget.inputs[key].shared) {
+      store.syncToRouter(widgetId, key, widget.inputs[key].value)
+    }
+    else {
+      store.removeFromRouter(widgetId, key)
     }
   })
 
