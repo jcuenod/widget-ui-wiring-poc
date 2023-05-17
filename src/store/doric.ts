@@ -208,6 +208,7 @@ const removeWidget = (widgetId: string) => {
 
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
+const primitiveTypes = new Set(["string", "number", "boolean"])
 const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
   const store = useStore()
 
@@ -217,6 +218,12 @@ const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
     if ("get" in inspection && "set" in inspection) {
       value = value.value
     }
+  }
+
+  // Ensure that only primitives are passed
+  if (!(primitiveTypes.has(typeof value))) {
+    console.error(`Widget "${widgetId}" tried to emit a non-primitive value to "${key}". Only strings, numbers, and booleans are supported.`)
+    return
   }
 
   // Get widgets that are subscribed to our output key on our widget
@@ -274,6 +281,11 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
       return widget.inputs[key].value
     },
     set value(newValue) {
+      // Ensure that only primitives are passed
+      if (!(primitiveTypes.has(typeof newValue))) {
+        console.error(`Widget "${widgetId}" tried to give input "${key}" a non-primitive value. Only strings, numbers, and booleans are supported.`)
+        return
+      }
       widget.inputs[key].value = newValue
     }
   }
