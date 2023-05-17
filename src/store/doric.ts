@@ -1,8 +1,6 @@
-import { watch } from 'vue'
 import {
   defineStore
 } from 'pinia'
-import type { Router } from 'vue-router'
 import widgetComponents from '@/components/doric-widgets/Widgets'
 
 
@@ -11,7 +9,6 @@ import widgetComponents from '@/components/doric-widgets/Widgets'
 const useDoricStore = defineStore('doric-workspace', {
   state: () => {
     return {
-      router: null as null | Router,
       columns: [] as Workspace,
     }
   },
@@ -42,29 +39,6 @@ const useDoricStore = defineStore('doric-workspace', {
         this.columns = [[]]
       }
     },
-    syncToRouter(widgetId: WidgetId, key: string, value: string) {
-      if (this?.router) {
-        this.router.replace({
-          query: {
-            ...(this.router.currentRoute?.query || {}),
-            [`${widgetId}.${key}`]: value,
-          }
-        })
-      }
-      else {
-        console.warn("Router not found, cannot sync workspace to router")
-      }
-    },
-    removeFromRouter(widgetId: WidgetId, key: string) {
-      if (this?.router) { 
-        const query = { ...this.router.currentRoute?.query }
-        delete query[`${widgetId}.${key}`]
-        this.router.replace({ query })
-      }
-      else {
-        console.warn("Router not found, cannot remove workspace from router")
-      }
-    },
   },
   getters: {
     workspaceShape: (state) => {
@@ -90,6 +64,12 @@ const useDoricStore = defineStore('doric-workspace', {
           || w.inputs[key].subscriptions.length === 0 // Implicit subscription
         )
       )
+    },
+    sharedParameters: (state) => {
+      const allWidgets = state.columns.flat()
+      const allInputs = allWidgets.map(w => Object.keys(w.inputs).map(key => ({ widgetId: w.id, key, input: w.inputs[key] }))).flat()
+      const sharedInputs: { [widgetId: string]: string, key: string }[] = allInputs.filter(i => i.input.shared)
+      return Object.fromEntries(sharedInputs.map(i => [`${i.widgetId}.${i.key}`, i.input.value]))
     },
   }
 })
@@ -205,6 +185,11 @@ const removeWidget = (widgetId: string) => {
   store.removeWidget(widgetId)
 }
 
+const sharedParameters = () => {
+  const store = useDoricStore()
+  return store.sharedParameters
+}
+
 
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
@@ -258,23 +243,6 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
     }
   }
 
-  // Every input includes a watcher that optionally shares the input value (to the url)
-  watch(() => widget.inputs[key].value, (newValue) => {
-    if (widget.inputs[key].shared) {
-      console.log(`Widget "${widgetId}"'s shared input "${key}" changed to "${newValue}"`)
-      store.syncToRouter(widgetId, key, newValue)
-    }
-  })
-  // Add and remove input to/from router when shared is toggled
-  watch(() => widget.inputs[key].shared, () => {
-    if (widget.inputs[key].shared) {
-      store.syncToRouter(widgetId, key, widget.inputs[key].value)
-    }
-    else {
-      store.removeFromRouter(widgetId, key)
-    }
-  })
-
   // Return reactive object
   return {
     get value() {
@@ -304,4 +272,5 @@ export {
   insertColumn,
   addWidget,
   removeWidget,
+  sharedParameters,
 }

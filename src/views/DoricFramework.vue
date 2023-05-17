@@ -10,6 +10,7 @@ import {
   getWidget,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
+  sharedParameters,
 } from '@/store/doric'
 import { useRouter } from 'vue-router'
 const router = useRouter()
@@ -58,6 +59,20 @@ watch(activeWorkspace, (newActiveWorkspace) => {
         workspace: newActiveWorkspace,
       }
     })
+  })
+})
+
+watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
+  // If a param has been unshared, we need to be sure we remove it
+  // from the query (overwriting the query will not remove it)
+  const oldQuery = Object.entries(router.currentRoute.value.query)
+  const oldQueryWithoutOldParameters = oldQuery.filter(([key, _]) => !(key in oldSharedParameters))
+  
+  router.replace({
+    query: {
+    ...Object.fromEntries(oldQueryWithoutOldParameters),
+    ...newSharedParameters,
+    }
   })
 })
 
