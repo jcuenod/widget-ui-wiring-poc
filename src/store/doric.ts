@@ -8,7 +8,7 @@ import widgetComponents from '@/components/doric-widgets/Widgets'
 
 // WORKSPACE STORE / WIDGETS STATE -----------------------------------------------------------------
 
-const useStore = defineStore('workspace', {
+const useDoricStore = defineStore('doric-workspace', {
   state: () => {
     return {
       router: null as null | Router,
@@ -147,12 +147,12 @@ const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
 // WORKSPACE --------------------------------------------------------------------------------------
 
 const getWorkspaceShape = () => {
-  const store = useStore()
+  const store = useDoricStore()
   return store.workspaceShape
 }
 
 const setWorkspace = (newColumns: Workspace) => new Promise<void>((resolve) => {
-  const store = useStore()
+  const store = useDoricStore()
 
   // First check that every widget has "subscriptions" and "inputs" fields
   const validatedWidgetIds: string[] = []
@@ -178,12 +178,12 @@ const setWorkspace = (newColumns: Workspace) => new Promise<void>((resolve) => {
 })
 
 const insertColumn = (columnIndex: number) => {
-  const store = useStore()
+  const store = useDoricStore()
   store.insertColumn(columnIndex)
 }
 
 const getWidget = (widgetId: string) => {
-  const store = useStore()
+  const store = useDoricStore()
   const widget = store.widgets.find(w => w.id === widgetId)
   if (!widget) {
     throw new Error(`Widget with id "${widgetId}" not found`)
@@ -191,17 +191,17 @@ const getWidget = (widgetId: string) => {
   return widget
 }
 const getWidgetIds = () => {
-  const store = useStore()
+  const store = useDoricStore()
   return store.widgetIds
 }
 
 const addWidget = (widget: Widget, column: number) => {
-  const store = useStore()
+  const store = useDoricStore()
   store.addWidget(widget, column)
 }
 
 const removeWidget = (widgetId: string) => {
-  const store = useStore()
+  const store = useDoricStore()
   store.removeWidget(widgetId)
 }
 
@@ -210,7 +210,7 @@ const removeWidget = (widgetId: string) => {
 
 const primitiveTypes = new Set(["string", "number", "boolean"])
 const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
-  const store = useStore()
+  const store = useDoricStore()
 
   // Unwrap reactive objects
   if (value instanceof Object && "value" in value) {
@@ -242,7 +242,7 @@ type UseDoricInputOptions = {
   shared?: boolean
 }
 const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputOptions) => {
-  const store = useStore()
+  const store = useDoricStore()
 
   const widget = store.widgets.find(w => w.id === widgetId)
   if (!widget) {
