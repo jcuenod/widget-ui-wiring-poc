@@ -54,3 +54,9 @@ type SharedParameters = {
   key: string
   value: string
 }
+
+type WidgetInputState = {
+  widgetId: string
+  key: string
+  value: string | boolean | number
+}

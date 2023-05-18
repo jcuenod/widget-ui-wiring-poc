@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import {
   getUseDoricInput,
   getUseDoricOutput,
@@ -8,6 +8,7 @@ import {
   insertColumn,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
+  injectWorkspaceState,
   sharedParameters,
 } from '@/store/doric'
 
@@ -20,6 +21,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  initialState: {
+    type: Object,
+    required: false,
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['setSharedParameters'])
@@ -27,6 +33,7 @@ const emit = defineEmits(['setSharedParameters'])
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import DoricMissingWidget from '@/components/DoricMissingWidget.vue';
 
+const loadingWorkspace = ref(false)
 const configWidget = ref(false)
 const showWidgetsToAddColumn = ref(-1)
 
@@ -34,13 +41,30 @@ watch(() => props.workspace, (newWorkspace) => {
   if (!newWorkspace) {
     return
   }
+  loadingWorkspace.value = true
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
-  setWorkspace(newWorkspace)
+  setWorkspace(newWorkspace).then(() => {
+    loadingWorkspace.value = false
+  })
 })
 
 watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
   emit("setSharedParameters", newSharedParameters, oldSharedParameters)
+})
+
+watch(() => props.initialState, (newInitialState) => {
+  if (!newInitialState) {
+    return
+  }
+  const waitForWorkspace = () => { 
+    if (loadingWorkspace.value) {
+      nextTick(waitForWorkspace)
+      return
+    }
+    injectWorkspaceState(newInitialState)
+  }
+  nextTick(waitForWorkspace)
 })
 
 const configureWidget = (widgetId) => {

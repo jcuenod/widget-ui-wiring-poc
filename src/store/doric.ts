@@ -191,6 +191,26 @@ const sharedParameters = () => {
   return store.sharedParameters
 }
 
+const injectWorkspaceState = (stateArray: WidgetInputState[]) => {
+  const store = useDoricStore()
+  stateArray.forEach(({ widgetId, key, value }) => {
+    const widget = store.widgets.find(w => w.id === widgetId)
+    if (!widget) {
+      console.error(`Widget with id "${widgetId}" not found`)
+      return
+    }
+    if (!("inputs" in widget)) {
+      console.error(`Widget with id "${widgetId}" has no inputs`)
+      return
+    }
+    if (!(key in (widget?.inputs || {}))) {
+      console.error(`Widget with id "${widgetId}" has no input "${key}"`)
+      return
+    }
+    widget.inputs[key].value = value
+  })
+}
+
 
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
@@ -273,5 +293,6 @@ export {
   insertColumn,
   addWidget,
   removeWidget,
+  injectWorkspaceState,
   sharedParameters,
 }
