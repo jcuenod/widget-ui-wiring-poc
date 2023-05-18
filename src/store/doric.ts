@@ -101,7 +101,7 @@ const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
   if (!(w.type in widgetComponents)) {
     throw new Error(`Widget ${w} has an invalid type: ${w.type}`)
   }
-  
+
   return {
     type: w.type,
     id: w.id || "",

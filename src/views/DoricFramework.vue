@@ -67,11 +67,11 @@ watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
   // from the query (overwriting the query will not remove it)
   const oldQuery = Object.entries(router.currentRoute.value.query)
   const oldQueryWithoutOldParameters = oldQuery.filter(([key, _]) => !(key in oldSharedParameters))
-  
+
   router.replace({
     query: {
-    ...Object.fromEntries(oldQueryWithoutOldParameters),
-    ...newSharedParameters,
+      ...Object.fromEntries(oldQueryWithoutOldParameters),
+      ...newSharedParameters,
     }
   })
 })
@@ -144,7 +144,8 @@ const addWidget = (widgetType, column) => {
           </button>
         </div>
         <div v-show="showWidgetsToAddColumn === index" class="add-widget-list">
-          <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType" @click="() => addWidget(widgetType, index)">
+          <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType"
+            @click="() => addWidget(widgetType, index)">
             {{ widgets[widgetType].defaultLabel }}
           </button>
         </div>
@@ -187,6 +188,7 @@ const addWidget = (widgetType, column) => {
       >div {
         padding: 0.5rem;
       }
+
       .hidden {
         display: none;
       }
