@@ -49,6 +49,7 @@ onMounted(() => {
         })
     })
 })
+
 watch(activeWorkspace, (newActiveWorkspace) => {
     if (initialLoad.value) {
         return
@@ -58,17 +59,22 @@ watch(activeWorkspace, (newActiveWorkspace) => {
         return
     }
     workspace.value = workspaces[newActiveWorkspace]
+    router.push({
+        query: {
+            workspace: newActiveWorkspace,
+        },
+    })
 })
 
-const setSharedParameters = (sharedParameters) => {
-    console.log("shared", sharedParameters)
-    // updating shared params
-    // router.push({
-    //   query: {
-    //     ...router.currentRoute.value.query,
-    //     ...sharedParameters,
-    //   },
-    // })
+const setSharedParameters = (sharedParameters, oldSharedParameters) => {
+    const routerFunction = router.currentRoute.value.query.workspace === activeWorkspace.value
+        ? router.replace : router.push
+    routerFunction({
+        query: {
+            workspace: activeWorkspace.value,
+            ...sharedParameters,
+        },
+    })
 }
 
 </script>
