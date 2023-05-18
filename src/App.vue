@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import DoricFramework from './views/DoricFramework.vue'
+import Main from './views/Main.vue'
 </script>
 
 <template>
-  <DoricFramework />
+  <Main />
 </template>

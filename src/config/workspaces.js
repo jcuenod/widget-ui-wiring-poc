@@ -28,6 +28,8 @@ const workspaces = {
       id: "text-display-0",
       type: "text-display-widget",
       label: "Passage Display",
+    }, {
+      type: "missing-widget",
     }]
   ],
 
@@ -56,6 +58,7 @@ const workspaces = {
       inputs: {
         "osisRef": {
           value: "Heb.1.1",
+          shared: true,
           subscriptions: ["text-display-1", "dictionary-0"],
         },
       },
