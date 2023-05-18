@@ -214,9 +214,10 @@ const getUseDoricOutput = (...args: [string, string, any]) => {
   if (args.length < 3) {
     return (...moreArgs: any[]) => getUseDoricOutput(...args.concat(...moreArgs) as [string, string, any])
   }
-  const [widgetId, key] = args
-  let value = args[2]
-  console.log(`Widget "${widgetId}" emitted "${value}" to "${key}"`)
+  // End partial application logic
+  const widgetId: string = args[0]
+  const key: string = args[1]
+  let value: any = args[2]
 
   const store = useDoricStore()
 
