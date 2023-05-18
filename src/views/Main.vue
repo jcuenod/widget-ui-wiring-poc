@@ -6,7 +6,7 @@ import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import DoricFramework from './DoricFramework.vue'
 
-const initialLoad = ref(true)
+const initialWorkspaceState = ref([])
 const activeWorkspace = ref("")
 const workspace = ref({})
 
@@ -19,7 +19,7 @@ onMounted(() => {
             return
         }
         activeWorkspace.value = workspaceId
-        const stateFromRouter = Object.entries(router.currentRoute.value.query)
+        initialWorkspaceState.value = Object.entries(router.currentRoute.value.query)
             .filter(([key]) => key.includes('.'))
             .map(([routerKey, value]) => {
                 const [widgetId, key] = routerKey.split('.')
@@ -29,34 +29,10 @@ onMounted(() => {
                     value,
                 }
             })
-        const newWorkspace: MinimalWorkspace = structuredClone(workspaces[workspaceId as keyof typeof workspaces])
-        newWorkspace.forEach((_, column) => {
-            newWorkspace[column].forEach((_, row) => {
-                const widget = newWorkspace[column][row]
-                if ("inputs" in widget) {
-                    const stateForWidget = stateFromRouter.filter(({ widgetId }) => widgetId === widget.id)
-                    stateForWidget.forEach(({ key, value }) => {
-                        if (!(key in (widget as WidgetWithInputs).inputs)) {
-                            console.warn(`Ignoring invalid input key: ${key}`)
-                            return
-                        }
-                        // @ts-ignore -- we have tested the existence of each of these points in the tree
-                        newWorkspace[column][row].inputs[key].value = value
-                    })
-                }
-            })
-        })
-        workspace.value = newWorkspace
-        nextTick(() => {
-            initialLoad.value = false
-        })
     })
 })
 
 watch(activeWorkspace, (newActiveWorkspace) => {
-    if (initialLoad.value) {
-        return
-    }
     if (!newActiveWorkspace || !(newActiveWorkspace in workspaces)) {
         console.error(`Invalid workspace: ${newActiveWorkspace}`)
         return
@@ -91,6 +67,7 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
     <DoricFramework
         :widgets="widgets"
         :workspace="workspace"
+        :initialState="initialWorkspaceState"
         @setSharedParameters="setSharedParameters"
         />
 </template>
