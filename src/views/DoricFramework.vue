@@ -16,6 +16,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
+import DoricMissingWidget from '@/components/DoricMissingWidget.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
 import workspaces, {defaultWorkspace} from "@/config/workspaces"
 
@@ -47,7 +48,7 @@ watch(activeWorkspace, (newActiveWorkspace) => {
     // Be sure to unset the isNavigating flag after the url has been updated
     isNavigating.value = true
 
-    const initialWorkspaceInputs = router.currentRoute.value.query   
+    const initialWorkspaceInputs = router.currentRoute.value.query
     setWorkspace(workspaces[newActiveWorkspace]).then(() => {
       // If the new workspace is already in sync with the url, this is the initial load
       if (initialWorkspaceInputs?.workspace === newActiveWorkspace) {
@@ -152,8 +153,11 @@ const addWidget = (widgetType, column) => {
           <DoricWidgetConfig :widgetId="widget.id" />
         </div>
         <div :class="{ 'hidden': configWidget === widget.id }">
-          <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
+          <component v-if="widget?.type in widgets && 'widget' in widgets[widget.type]"
+            :is="widgets[widget.type].widget"
+            :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
             :useDoricInput="(param, options) => getUseDoricInput(widget.id, param, options)" />
+          <DoricMissingWidget :type="widget?.type" v-else />
         </div>
       </div>
       <div class="add-widget">

@@ -97,17 +97,15 @@ const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
 }
 
 const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
+  // Note: We don't check that the widget type exists, we handle that case in the display
   if (!w.type || typeof w.type !== "string") {
     throw new Error(`Widget ${w} is missing a type or the type is invalid: ${w.type}`)
-  }
-  if (!(w.type in widgetComponents)) {
-    throw new Error(`Widget ${w} has an invalid type: ${w.type}`)
   }
 
   return {
     type: w.type,
     id: w.id || "",
-    label: w.label || widgetComponents[w.type].defaultLabel,
+    label: w.label || widgetComponents[w.type]?.defaultLabel || w.type,
     inputs: getValidatedInputs(w.inputs || {}),
   } as Widget
 }
