@@ -73,10 +73,10 @@ const toggleShared = (key) => {
               <td>
                 <!-- use checkboxes instead of multi-select -->
                 <span v-for="widgetId in widgetIds" :key="widgetId">
-                  <input type="checkbox" :id="widgetId" class="multi-select"
+                  <input type="checkbox" :id="`${widgetId}.${key}`" class="multi-select"
                     :checked="isSubscribed(widgetId,key)"
                     @change="(event) => toggleSubscription(event, key)" />
-                  <label :for="widgetId">
+                  <label :for="`${widgetId}.${key}`">
                     {{ widgetId }}
                   </label>
                 </span>
