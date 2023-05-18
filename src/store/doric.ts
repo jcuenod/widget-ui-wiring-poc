@@ -68,8 +68,10 @@ const useDoricStore = defineStore('doric-workspace', {
     sharedParameters: (state) => {
       const allWidgets = state.columns.flat()
       const allInputs = allWidgets.map(w => Object.keys(w.inputs).map(key => ({ widgetId: w.id, key, input: w.inputs[key] }))).flat()
-      const sharedInputs: { [widgetId: string]: string, key: string }[] = allInputs.filter(i => i.input.shared)
-      return Object.fromEntries(sharedInputs.map(i => [`${i.widgetId}.${i.key}`, i.input.value]))
+      const sharedInputs: { widgetId: string, key: string, value: string }[] = allInputs
+        .filter(i => i.input.shared)
+        .map(i => ({ widgetId: i.widgetId, key: i.key, value: i.input.value }))
+      return Object.fromEntries(sharedInputs.map(i => [`${i.widgetId}.${i.key}`, i.value]))
     },
   }
 })
@@ -185,7 +187,7 @@ const removeWidget = (widgetId: string) => {
   store.removeWidget(widgetId)
 }
 
-const injectWorkspaceState = (state: { widgetId, key: string, value: string }[]) => {
+const injectWorkspaceState = (state: { widgetId: string, key: string, value: string }[]) => {
   const store = useDoricStore()
   state.forEach(({ widgetId, key, value }) => {
     const widget = store.widgets.find(w => w.id === widgetId)
