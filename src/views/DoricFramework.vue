@@ -17,7 +17,7 @@ const router = useRouter()
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
-import workspaces, {defaultWorkspace} from "@/store/workspaces"
+import workspaces, {defaultWorkspace} from "@/config/workspaces"
 
 const isNavigating = ref(false)
 const activeWorkspace = ref(null)
