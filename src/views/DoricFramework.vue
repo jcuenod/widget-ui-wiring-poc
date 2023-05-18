@@ -44,51 +44,35 @@ watch(activeWorkspace, (newActiveWorkspace) => {
   showWidgetsToAddColumn.value = -1
 
   router.isReady().then(() => {
+    // Be sure to unset the isNavigating flag after the url has been updated
     isNavigating.value = true
-    if (router.currentRoute.value.query?.workspace !== newActiveWorkspace) {
-      setWorkspace(workspaces[newActiveWorkspace])
-      const paramsForUrl = sharedParameters()
-      console.log("paramsForUrl", paramsForUrl)
-      const query = {
-        workspace: newActiveWorkspace,
-        ...paramsForUrl,
+
+    const initialWorkspaceInputs = router.currentRoute.value.query   
+    setWorkspace(workspaces[newActiveWorkspace]).then(() => {
+      // If the new workspace is already in sync with the url, this is the initial load
+      if (initialWorkspaceInputs?.workspace === newActiveWorkspace) {
+        const widgetIds = new Set(getWidgetIds())
+        const state = Object.entries(initialWorkspaceInputs)
+          .map(([routerKey, value]) => {
+            const [widgetId, key] = routerKey.split('.')
+            return {
+              widgetId,
+              key,
+              value,
+            }
+          })
+          .filter(({ widgetId }) => widgetIds.has(widgetId))
+        injectWorkspaceState(state)
       }
-      console.log("query", query)
+
+      const paramsForUrl = sharedParameters()
       router.push({
         query: {
           workspace: newActiveWorkspace,
           ...paramsForUrl,
         },
-      }).finally((x) => {
-        isNavigating.value = false
-        console.log("pushed", x)
-        console.log(router.currentRoute.value.query)
-      })
-      return
-    }
-
-    // If the new workspace is already in sync with the url, this is the initial load
-    const initialWorkspaceInputs = router.currentRoute.value.query
-    setWorkspace(workspaces[newActiveWorkspace]).then(() => {
-      const widgetIds = new Set(getWidgetIds())
-      const state = Object.entries(initialWorkspaceInputs)
-        .map(([routerKey, value]) => {
-          const [widgetId, key] = routerKey.split('.')
-          return {
-            widgetId,
-            key,
-            value,
-          }
-        })
-        .filter(({ widgetId }) => widgetIds.has(widgetId))
-      injectWorkspaceState(state)
-
-      router.push({
-        query: {
-          workspace: newActiveWorkspace,
-          ...router.currentRoute.value.query,
-        }
       }).finally(() => {
+        // Unset the isNavigating flag after the url has been updated
         isNavigating.value = false
       })
     })
@@ -96,6 +80,8 @@ watch(activeWorkspace, (newActiveWorkspace) => {
 })
 
 watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
+  // Because this watcher updates the router, it cancels other navigation
+  // if it fires while the router is updating. This flag prevents that.
   if (isNavigating.value) {
     return
   }
