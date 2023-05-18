@@ -2,6 +2,7 @@ import {
   defineStore
 } from 'pinia'
 import widgetComponents from '@/components/doric-widgets/Widgets'
+import { nextTick } from 'vue'
 
 
 // WORKSPACE STORE / WIDGETS STATE -----------------------------------------------------------------
@@ -147,14 +148,14 @@ const setWorkspace = (newColumns: Workspace) => new Promise<void>((resolve) => {
 
   // If we give a whole new workspace, we need
   // to clear the current widget Ids so that the
-  // whole structure gets rebuilt.The `setTimeout`
-  // here allows the refresh to happen.Incremental
+  // whole structure gets rebuilt. Vue's `nextTick`
+  // allows the refresh to happen. Incremental
   // workspace updates need to be handled differently.
   store.columns = []
-  setTimeout(() => {
+  nextTick(() => {
     store.columns = validatedNewColumns
     resolve()
-  }, 0)
+  })
 })
 
 const insertColumn = (columnIndex: number) => {
@@ -183,18 +184,6 @@ const addWidget = (widget: Widget, column: number) => {
 const removeWidget = (widgetId: string) => {
   const store = useDoricStore()
   store.removeWidget(widgetId)
-}
-
-const injectWorkspaceState = (state: { widgetId: string, key: string, value: string }[]) => {
-  const store = useDoricStore()
-  state.forEach(({ widgetId, key, value }) => {
-    const widget = store.widgets.find(w => w.id === widgetId)
-    if (!widget) {
-      console.error(`Widget with id "${widgetId}" not found`)
-      return
-    }
-    widget.inputs[key].value = value
-  })
 }
 
 const sharedParameters = () => {
@@ -284,6 +273,5 @@ export {
   insertColumn,
   addWidget,
   removeWidget,
-  injectWorkspaceState,
   sharedParameters,
 }

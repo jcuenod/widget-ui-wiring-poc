@@ -9,94 +9,38 @@ import {
   getWidgetIds,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
-  injectWorkspaceState,
   sharedParameters,
 } from '@/store/doric'
-import { useRouter } from 'vue-router'
-const router = useRouter()
+
+const props = defineProps({
+  widgets: {
+    type: Object,
+    required: true,
+  },
+  workspace: {
+    type: Object,
+    required: true,
+  },
+})
+const emit = defineEmits(['setSharedParameters'])
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import DoricMissingWidget from '@/components/DoricMissingWidget.vue';
-import widgets from '@/components/doric-widgets/Widgets.ts';
-import workspaces, {defaultWorkspace} from "@/config/workspaces"
 
-const isNavigating = ref(false)
-const activeWorkspace = ref(null)
 const configWidget = ref(false)
 const showWidgetsToAddColumn = ref(-1)
 
-onMounted(() => {
-  // We need the workspace to be set up before we can populate the widget inputs
-  router.isReady().then(() => {
-    const workspace = router.currentRoute.value.query?.workspace || defaultWorkspace
-    if (!workspace || !(workspace in workspaces)) {
-      activeWorkspace.value = Object.keys(workspaces)[0]
-      return
-    }
-    activeWorkspace.value = workspace
-  })
-})
-
-watch(activeWorkspace, (newActiveWorkspace) => {
-  if (!newActiveWorkspace || !(newActiveWorkspace in workspaces)) {
+watch(() => props.workspace, (newWorkspace) => {
+  if (!newWorkspace) {
     return
   }
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
-
-  router.isReady().then(() => {
-    // Be sure to unset the isNavigating flag after the url has been updated
-    isNavigating.value = true
-
-    const initialWorkspaceInputs = router.currentRoute.value.query
-    setWorkspace(workspaces[newActiveWorkspace]).then(() => {
-      // If the new workspace is already in sync with the url, this is the initial load
-      if (initialWorkspaceInputs?.workspace === newActiveWorkspace) {
-        const widgetIds = new Set(getWidgetIds())
-        const state = Object.entries(initialWorkspaceInputs)
-          .map(([routerKey, value]) => {
-            const [widgetId, key] = routerKey.split('.')
-            return {
-              widgetId,
-              key,
-              value,
-            }
-          })
-          .filter(({ widgetId }) => widgetIds.has(widgetId))
-        injectWorkspaceState(state)
-      }
-
-      const paramsForUrl = sharedParameters()
-      router.push({
-        query: {
-          workspace: newActiveWorkspace,
-          ...paramsForUrl,
-        },
-      }).finally(() => {
-        // Unset the isNavigating flag after the url has been updated
-        isNavigating.value = false
-      })
-    })
-  })
+  setWorkspace(newWorkspace)
 })
 
-watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
-  // Because this watcher updates the router, it cancels other navigation
-  // if it fires while the router is updating. This flag prevents that.
-  if (isNavigating.value) {
-    return
-  }
-  // If a param has been unshared, we need to be sure we remove it
-  // from the query (overwriting the query will not remove it)
-  const oldQuery = Object.entries(router.currentRoute.value.query)
-  const oldQueryWithoutOldParameters = oldQuery.filter(([key, _]) => !(key in oldSharedParameters))
-
-  router.replace({
-    query: {
-      ...Object.fromEntries(oldQueryWithoutOldParameters),
-      ...newSharedParameters,
-    }
-  })
+watch(sharedParameters, (newSharedParameters) => {
+  emit("setSharedParameters", newSharedParameters)
 })
 
 const configureWidget = (widgetId) => {
@@ -130,12 +74,6 @@ const addWidget = (widgetType, column) => {
 </script>
 
 <template>
-  <div class="nav">
-    <select v-model="activeWorkspace">
-      <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
-    </select>
-  </div>
-
   <div class="doric-widget-framework">
     <div class="doric-widget-framework__column" v-for="(column, index) in getWorkspaceShape()" :key="index">
       <div class="doric-widget-framework__widget" :class="{ 'config-mode': configWidget === widget.id }"
@@ -241,13 +179,6 @@ const addWidget = (widgetType, column) => {
       }
     }
   }
-}
-
-.nav {
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
-  padding: 0.5rem;
 }
 
 .config-button {
