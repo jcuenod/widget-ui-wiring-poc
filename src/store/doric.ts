@@ -208,7 +208,16 @@ const sharedParameters = () => {
 // INPUTS AND OUTPUTS -----------------------------------------------------------------------------
 
 const primitiveTypes = new Set(["string", "number", "boolean"])
-const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
+const getUseDoricOutput = (...args: [string, string, any]) => {
+  // Partial application logic
+  // Allows invocation like getUseDoricOutput(widgetId)(key, value) // useful for the options api
+  if (args.length < 3) {
+    return (...moreArgs: any[]) => getUseDoricOutput(...args.concat(...moreArgs) as [string, string, any])
+  }
+  const [widgetId, key] = args
+  let value = args[2]
+  console.log(`Widget "${widgetId}" emitted "${value}" to "${key}"`)
+
   const store = useDoricStore()
 
   // Unwrap reactive objects

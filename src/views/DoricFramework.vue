@@ -152,7 +152,7 @@ const addWidget = (widgetType, column) => {
           <DoricWidgetConfig :widgetId="widget.id" />
         </div>
         <div :class="{ 'hidden': configWidget === widget.id }">
-          <component :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
+          <component :is="widgets[widget.type].widget" :useDoricOutput="(...args) => getUseDoricOutput(widget.id, ...args)"
             :useDoricInput="(param, options) => getUseDoricInput(widget.id, param, options)" />
         </div>
       </div>
