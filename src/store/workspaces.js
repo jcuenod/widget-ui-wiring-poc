@@ -80,4 +80,5 @@ const workspaces = {
   ],
 }
 
+export const defaultWorkspace = "default"
 export default workspaces
