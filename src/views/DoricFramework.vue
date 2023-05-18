@@ -39,8 +39,8 @@ watch(() => props.workspace, (newWorkspace) => {
   setWorkspace(newWorkspace)
 })
 
-watch(sharedParameters, (newSharedParameters) => {
-  emit("setSharedParameters", newSharedParameters)
+watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
+  emit("setSharedParameters", newSharedParameters, oldSharedParameters)
 })
 
 const configureWidget = (widgetId) => {
