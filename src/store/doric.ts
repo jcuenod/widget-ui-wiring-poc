@@ -185,6 +185,18 @@ const removeWidget = (widgetId: string) => {
   store.removeWidget(widgetId)
 }
 
+const injectWorkspaceState = (state: { widgetId, key: string, value: string }[]) => {
+  const store = useDoricStore()
+  state.forEach(({ widgetId, key, value }) => {
+    const widget = store.widgets.find(w => w.id === widgetId)
+    if (!widget) {
+      console.error(`Widget with id "${widgetId}" not found`)
+      return
+    }
+    widget.inputs[key].value = value
+  })
+}
+
 const sharedParameters = () => {
   const store = useDoricStore()
   return store.sharedParameters
@@ -272,5 +284,6 @@ export {
   insertColumn,
   addWidget,
   removeWidget,
+  injectWorkspaceState,
   sharedParameters,
 }

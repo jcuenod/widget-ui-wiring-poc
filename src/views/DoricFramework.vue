@@ -7,9 +7,9 @@ import {
   setWorkspace,
   insertColumn,
   getWidgetIds,
-  getWidget,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
+  injectWorkspaceState,
   sharedParameters,
 } from '@/store/doric'
 import { useRouter } from 'vue-router'
@@ -19,6 +19,7 @@ import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
 import widgets from '@/components/doric-widgets/Widgets.ts';
 import workspaces from "@/store/workspaces"
 
+const isNavigating = ref(false)
 const activeWorkspace = ref(null)
 const configWidget = ref(false)
 const showWidgetsToAddColumn = ref(-1)
@@ -26,8 +27,12 @@ const showWidgetsToAddColumn = ref(-1)
 onMounted(() => {
   // We need the workspace to be set up before we can populate the widget inputs
   router.isReady().then(() => {
-    const currentWorkspace = router.currentRoute.value.query.workspace || "default"
-    activeWorkspace.value = currentWorkspace
+    const workspace = router.currentRoute.value.query?.workspace
+    if (!workspace || !(workspace in workspaces)) {
+      activeWorkspace.value = Object.keys(workspaces)[0]
+      return
+    }
+    activeWorkspace.value = workspace
   })
 })
 
@@ -37,32 +42,63 @@ watch(activeWorkspace, (newActiveWorkspace) => {
   }
   configWidget.value = false
   showWidgetsToAddColumn.value = -1
-  setWorkspace(workspaces[newActiveWorkspace]).then(() => {
-    const widgetIds = new Set(getWidgetIds())
-    const workspaceState = Object.entries(router.currentRoute.value.query)
-    workspaceState.forEach(([scopedKey, value]) => {
-      const [widgetId, key] = scopedKey.split('.')
-      if (!widgetIds.has(widgetId)) {
-        return
-      }
-      const widget = getWidget(widgetId)
-      if (!(key in widget.inputs)) {
-        return
-      }
-      widget.inputs[key].value = value
-    })
-  })
+
   router.isReady().then(() => {
-    router.push({
-      query: {
-        ...router.currentRoute.value.query,
+    isNavigating.value = true
+    if (router.currentRoute.value.query?.workspace !== newActiveWorkspace) {
+      setWorkspace(workspaces[newActiveWorkspace])
+      const paramsForUrl = sharedParameters()
+      console.log("paramsForUrl", paramsForUrl)
+      const query = {
         workspace: newActiveWorkspace,
+        ...paramsForUrl,
       }
+      console.log("query", query)
+      router.push({
+        query: {
+          workspace: newActiveWorkspace,
+          ...paramsForUrl,
+        },
+      }).finally((x) => {
+        isNavigating.value = false
+        console.log("pushed", x)
+        console.log(router.currentRoute.value.query)
+      })
+      return
+    }
+
+    // If the new workspace is already in sync with the url, this is the initial load
+    const initialWorkspaceInputs = router.currentRoute.value.query
+    setWorkspace(workspaces[newActiveWorkspace]).then(() => {
+      const widgetIds = new Set(getWidgetIds())
+      const state = Object.entries(initialWorkspaceInputs)
+        .map(([routerKey, value]) => {
+          const [widgetId, key] = routerKey.split('.')
+          return {
+            widgetId,
+            key,
+            value,
+          }
+        })
+        .filter(({ widgetId }) => widgetIds.has(widgetId))
+      injectWorkspaceState(state)
+
+      router.push({
+        query: {
+          workspace: newActiveWorkspace,
+          ...router.currentRoute.value.query,
+        }
+      }).finally(() => {
+        isNavigating.value = false
+      })
     })
   })
 })
 
 watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
+  if (isNavigating.value) {
+    return
+  }
   // If a param has been unshared, we need to be sure we remove it
   // from the query (overwriting the query will not remove it)
   const oldQuery = Object.entries(router.currentRoute.value.query)
