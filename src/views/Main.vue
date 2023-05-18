@@ -6,7 +6,7 @@ import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import DoricFramework from './DoricFramework.vue'
 
-const initialWorkspaceState = ref([])
+const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspace = ref("")
 const workspace = ref({})
 
