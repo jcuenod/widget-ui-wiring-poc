@@ -11,7 +11,7 @@ const props = defineProps({
 const widget = getWidget(props.widgetId)
 const widgetIds = getWidgetIds()
 
-const isSubscribed = (widgetId, key) =>
+const isSubscribedTo = (key, widgetId) =>
   widget.inputs[key].subscriptions.includes(widgetId)
 
 const toggleSubscription = (event, key) => {
@@ -74,7 +74,7 @@ const toggleShared = (key) => {
                 <!-- use checkboxes instead of multi-select -->
                 <span v-for="widgetId in widgetIds" :key="widgetId">
                   <input type="checkbox" :id="`${widgetId}.${key}`" class="multi-select"
-                    :checked="isSubscribed(widgetId,key)"
+                    :checked="isSubscribedTo(key, widgetId)"
                     @change="(event) => toggleSubscription(event, key)" />
                   <label :for="`${widgetId}.${key}`">
                     {{ widgetId }}
