@@ -1,12 +1,11 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import {
   getUseDoricInput,
   getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
   insertColumn,
-  getWidgetIds,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
   sharedParameters,
@@ -22,6 +21,7 @@ const props = defineProps({
     required: true,
   },
 })
+
 const emit = defineEmits(['setSharedParameters'])
 
 import DoricWidgetConfig from '@/components/DoricWidgetConfig.vue';
@@ -51,6 +51,7 @@ const configureWidget = (widgetId) => {
   showWidgetsToAddColumn.value = -1
   configWidget.value = widgetId
 }
+
 const removeWidget = (widgetId) => {
   configWidget.value = false
   removeDoricWidget(widgetId)
@@ -64,6 +65,7 @@ const setColumnToAddWidget = (column) => {
   configWidget.value = false
   showWidgetsToAddColumn.value = column
 }
+
 const addWidget = (widgetType, column) => {
   addDoricWidget({
     id: widgetType.replace("-widget", "-0"),
