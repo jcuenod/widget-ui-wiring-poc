@@ -14,22 +14,20 @@ const widgetIds = getWidgetIds()
 const isSubscribedTo = (key, widgetId) =>
   widget.inputs[key].subscriptions.includes(widgetId)
 
-const toggleSubscription = (event, key) => {
-  // Get target checkbox and whether it is checked
-  const checkbox = event.target
-  const checked = checkbox.checked
+const toggleSubscription = (key, widgetId) => {
+  const checked = !isSubscribedTo(key, widgetId)
 
   // Update the subscription's widgetSubscriptions
   const newKeySubscriptions = [...widget.inputs[key].subscriptions]
   if (checked) {
-    newKeySubscriptions.push(checkbox.id)
+    newKeySubscriptions.push(widgetId)
   } else {
-    const index = newKeySubscriptions.indexOf(checkbox.id)
+    const index = newKeySubscriptions.indexOf(widgetId)
     if (index > -1) {
       newKeySubscriptions.splice(index, 1)
     }
   }
-  widget.inputs[key].subscriptions = newKeySubscriptions
+  widget.inputs[key].subscriptions = [...newKeySubscriptions]
 }
 const subscribeToAll = (key) => {
   const newKeySubscriptions = [...widgetIds]
@@ -75,7 +73,7 @@ const toggleShared = (key) => {
                 <span v-for="widgetId in widgetIds" :key="widgetId">
                   <input type="checkbox" :id="`${widgetId}.${key}`" class="multi-select"
                     :checked="isSubscribedTo(key, widgetId)"
-                    @change="(event) => toggleSubscription(event, key)" />
+                    @change="toggleSubscription(key, widgetId)" />
                   <label :for="`${widgetId}.${key}`">
                     {{ widgetId }}
                   </label>
@@ -87,7 +85,7 @@ const toggleShared = (key) => {
               <td>
                   <input type="checkbox" :id="widgetId"
                     :checked="widget.inputs[key].shared"
-                    @change="(event) => toggleShared(key)" />
+                    @change="toggleShared(key)" />
               </td>
             </tr>
           </tbody>
