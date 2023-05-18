@@ -109,7 +109,8 @@ const addWidget = (widgetType, column) => {
             {{ !configWidget ? widget.label : widget.id }}
           </span>
           <span class="config-button" v-show="!configWidget || configWidget === widget.id">
-            <button @click="() => configureWidget(widget.id)">configure</button>
+            <button v-if="widget?.type in widgets && 'widget' in widgets[widget.type]"
+              @click="() => configureWidget(widget.id)">configure</button>
             <button @click="() => removeWidget(widget.id)">X</button>
           </span>
         </header>
