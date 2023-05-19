@@ -216,6 +216,10 @@ const createColumnForWidget = (first, event) => {
       border-color: orange;
     }
 
+    &.sortable-chosen {
+      border: 1px dashed #000;
+    }
+
     header {
       display: flex;
       flex-direction: row;
@@ -224,6 +228,10 @@ const createColumnForWidget = (first, event) => {
       background-color: #eee;
       padding: 0.5rem;
       user-select: none;
+
+      &.drag-handle {
+        cursor: grab;
+      }
     }
 
     >div {
