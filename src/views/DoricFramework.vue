@@ -154,6 +154,7 @@ const addWidget = (widgetType, column) => {
 .doric-widget-framework {
   display: flex;
   flex-direction: row;
+  flex: 1;
   margin: 0 0.1rem;
 
   .doric-widget-framework__widget {
@@ -214,6 +215,10 @@ const addWidget = (widgetType, column) => {
 </style>
 
 <style lang="scss" global>
+.splitpanes {
+  height: auto;
+}
+
 .splitpanes--vertical>.splitpanes__splitter {
   box-sizing: border-box;
   width: 12px;
