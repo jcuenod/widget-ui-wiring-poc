@@ -119,7 +119,6 @@ const handleRearrange = (colIndex, event) => {
 
 const createColumnForWidget = (first, event) => {
   const colIndex = first ? 0 : getWorkspaceShape().length
-  console.log("createColumnForWidget", colIndex, event)
   insertColumn(colIndex)
   Object.entries(event).forEach(([method, details]) => {
     const widgetId = details.element.id
