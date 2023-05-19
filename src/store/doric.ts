@@ -17,6 +17,12 @@ const useDoricStore = defineStore('doric-workspace', {
     insertColumn(columnIndex: number) {
       this.columns = [...this.columns.slice(0, columnIndex), [], ...this.columns.slice(columnIndex)]
     },
+    removeColumn(columnIndex: number) {
+      this.columns[columnIndex].forEach(w => {
+        this.removeWidget(w.id)
+      })
+      this.columns = [...this.columns.slice(0, columnIndex), ...this.columns.slice(columnIndex + 1)]
+    },
     addWidget(widget: MinimalWidget, column: number) {
       // Add widget to workspace
       const validatedWidget = getValidatedWidget(widget)
@@ -34,11 +40,8 @@ const useDoricStore = defineStore('doric-workspace', {
           w.inputs[key].subscriptions = w.inputs[key].subscriptions.filter(ws => ws !== widgetId)
         })
       })
-      // Remove widget from workspace and filter out potentially empty columns
-      this.columns = this.columns.map(c => c.filter(w => w.id !== widgetId)).filter(c => c.length > 0)
-      if (this.columns.length === 0) {
-        this.columns = [[]]
-      }
+      // Remove widget from workspace
+      this.columns = this.columns.map(c => c.filter(w => w.id !== widgetId))
     },
   },
   getters: {
@@ -163,6 +166,11 @@ const insertColumn = (columnIndex: number) => {
   store.insertColumn(columnIndex)
 }
 
+const removeColumn = (columnIndex: number) => {
+  const store = useDoricStore()
+  store.removeColumn(columnIndex)
+}
+
 const getWidget = (widgetId: string) => {
   const store = useDoricStore()
   const widget = store.widgets.find(w => w.id === widgetId)
@@ -185,6 +193,23 @@ const removeWidget = (widgetId: string) => {
   const store = useDoricStore()
   store.removeWidget(widgetId)
 }
+
+const moveWidget = (widgetId: string, newColumnIndex: number, newRowIndex: number) => {
+  const store = useDoricStore()
+  const widget = store.widgets.find(w => w.id === widgetId)
+  if (!widget) {
+    throw new Error(`Widget with id "${widgetId}" not found`)
+  }
+  store.columns = store.columns.map((column, i) => {
+    return column.filter(w => w.id !== widgetId)
+  }).map((column, i) => {
+    if (i === newColumnIndex) {
+      return [...column.slice(0, newRowIndex), widget, ...column.slice(newRowIndex)]
+    }
+    return column
+  })
+}
+  
 
 const sharedParameters = () => {
   const store = useDoricStore()
@@ -291,8 +316,10 @@ export {
   getUseDoricInput,
   getUseDoricOutput,
   insertColumn,
+  removeColumn,
   addWidget,
   removeWidget,
+  moveWidget,
   injectWorkspaceState,
   sharedParameters,
 }
