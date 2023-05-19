@@ -59,25 +59,34 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
 </script>
 
 <template>
-    <div class="nav">
-        <select v-model="activeWorkspace">
-            <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
-        </select>
+    <div class="App">
+        <div class="nav">
+            <select v-model="activeWorkspace">
+                <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
+            </select>
+        </div>
+        <DoricFramework
+            :widgets="widgets"
+            :workspace="workspace"
+            :initialState="initialWorkspaceState"
+            @setSharedParameters="setSharedParameters"
+            />
     </div>
-    <DoricFramework
-        :widgets="widgets"
-        :workspace="workspace"
-        :initialState="initialWorkspaceState"
-        @setSharedParameters="setSharedParameters"
-        />
 </template>
 
-<style scoped>
-.nav {
+<style lang="scss" scoped>
+.App {
     display: flex;
-    flex-direction: row;
-    justify-content: end;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
+    flex-direction: column;
+    width: 100vw;
+    min-height: 100vh;
+    
+    .nav {
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+    }
 }
 </style>
