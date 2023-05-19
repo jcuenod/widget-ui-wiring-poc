@@ -2,14 +2,17 @@
 import { nextTick, ref, watch } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+import draggable from "vuedraggable";
 import {
   getUseDoricInput,
   getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
   insertColumn,
+  removeColumn,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
+  moveWidget as moveDoricWidget,
   injectWorkspaceState,
   sharedParameters,
 } from '@/store/doric'
@@ -99,36 +102,78 @@ const addWidget = (widgetType, column) => {
   }, column)
   showWidgetsToAddColumn.value = -1
 }
+
+const handleRearrange = (colIndex, event) => {
+  Object.entries(event).forEach(([method, details]) => {
+    const widgetId = details.element.id
+    const newIndex = details.newIndex
+    if (method === "moved" || method === "added") {
+      moveDoricWidget(widgetId, colIndex, newIndex)
+    }
+    // Technically there is also the `method === "removed"`
+    // We are not handling it, because we know that when a 
+    // widget is "added" by draggable, it is also "removed" 
+    // from the previous column
+  })
+}
+
+const createColumnForWidget = (first, event) => {
+  const colIndex = first ? 0 : getWorkspaceShape().length
+  console.log("createColumnForWidget", colIndex, event)
+  insertColumn(colIndex)
+  Object.entries(event).forEach(([method, details]) => {
+    const widgetId = details.element.id
+    if (method === "added") {
+      moveDoricWidget(widgetId, colIndex, 0)
+    }
+  })
+}
 </script>
 
 <template>
   <div class="doric-widget-framework">
+    <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(true, $event)" itemKey="id">
+      <template #item="{ element, index }">
+        <!-- This is just a placeholder to receive widgets and create columns on the fly -->
+      </template>
+    </draggable>
     <splitpanes>
+
       <pane min-size="20" v-for="(column, index) in getWorkspaceShape()" :key="index"
         :size="100 / getWorkspaceShape().length">
-        <div v-for="(widget) in column" :key="widget.id" class="doric-widget-framework__widget"
-          :class="{ 'config-mode': configWidget === widget.id }">
-          <header>
-            <span>
-              {{ !configWidget ? widget.label : widget.id }}
-            </span>
-            <span class="config-button" v-show="!configWidget || configWidget === widget.id">
-              <button v-if="widget?.type in widgets && 'widget' in widgets[widget.type]"
-                @click="() => configureWidget(widget.id)">configure</button>
-              <button @click="() => removeWidget(widget.id)">X</button>
-            </span>
-          </header>
-          <div v-if="configWidget === widget.id">
-            <DoricWidgetConfig :widgetId="widget.id" />
-          </div>
-          <div :class="{ 'hidden': configWidget === widget.id }">
-            <component v-if="widget?.type in widgets && 'widget' in widgets[widget.type]"
-              :is="widgets[widget.type].widget" :useDoricOutput="param => getUseDoricOutput(widget.id, param)"
-              :useDoricInput="(param, options) => getUseDoricInput(widget.id, param, options)" />
-            <DoricMissingWidget :type="widget?.type" v-else />
-          </div>
+        <div class="column-buttons">
+          <button v-if="column.length === 0" @click="() => removeColumn(index)">Remove Column</button>
         </div>
-        <div class="add-widget">
+
+        <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
+          handle=".drag-handle">
+          <template #item="{ element, index }">
+            <div class="doric-widget-framework__widget" :class="{ 'config-mode': configWidget === element.id }">
+              <header class="drag-handle">
+                <span>
+                  {{ !configWidget ? element.label : element.id }}
+                </span>
+                <span class="config-button" v-show="!configWidget || configWidget === element.id">
+                  <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
+                    @click="() => configureWidget(element.id)">configure</button>
+                  <button @click="() => removeWidget(element.id)">X</button>
+                </span>
+              </header>
+              <div v-if="configWidget === element.id">
+                <DoricWidgetConfig :widgetId="element.id" />
+              </div>
+              <div :class="{ 'hidden': configWidget === element.id }">
+                <component v-if="element?.type in widgets && 'widget' in widgets[element.type]"
+                  :is="widgets[element.type].widget" :useDoricOutput="param => getUseDoricOutput(element.id, param)"
+                  :useDoricInput="(param, options) => getUseDoricInput(element.id, param, options)" />
+                <DoricMissingWidget :type="element?.type" v-else />
+              </div>
+            </div>
+          </template>
+        </draggable>
+
+
+        <div class="column-buttons">
           <div>
             <button v-if="showWidgetsToAddColumn === -1" @click="() => setColumnToAddWidget(index)">
               +
@@ -146,6 +191,11 @@ const addWidget = (widgetType, column) => {
         </div>
       </pane>
     </splitpanes>
+    <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
+      <template #item="{ element, index }">
+        <!-- This is just a placeholder to receive widgets and create columns on the fly -->
+      </template>
+    </draggable>
     <div class="column-insert"><button @click="insertColumn(getWorkspaceShape().length)">+</button></div>
   </div>
 </template>
@@ -185,7 +235,7 @@ const addWidget = (widgetType, column) => {
     }
   }
 
-  .add-widget {
+  .column-buttons {
     display: flex;
     flex-direction: column;
     align-items: center;
