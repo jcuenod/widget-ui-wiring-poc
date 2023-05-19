@@ -172,6 +172,7 @@ const addWidget = (widgetType, column) => {
       align-items: center;
       background-color: #eee;
       padding: 0.5rem;
+      user-select: none;
     }
 
     >div {
@@ -220,6 +221,7 @@ const addWidget = (widgetType, column) => {
   border-left: 4px solid #fff;
   border-right: 4px solid #fff;
   background-color: #f8f8f8;
+  user-select: none;
 
   &:hover {
     background-color: #ccc;
