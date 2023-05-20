@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
-import DoricFramework from './DoricFramework.vue'
+import { DoricFramework } from 'doric-framework'
+import "doric-framework/dist/style.css"
 
 const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspace = ref("")
@@ -80,7 +81,7 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
     flex-direction: column;
     width: 100vw;
     min-height: 100vh;
-    
+
     .nav {
         display: flex;
         flex-direction: row;
