@@ -7,6 +7,7 @@ import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import { DoricFramework } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
+const locked = ref(false)
 const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspace = ref("")
 const workspace = ref({})
@@ -62,16 +63,27 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
 <template>
     <div class="App">
         <div class="nav">
+            <button @click="locked = !locked" class="p-1 m-0 mr-1">
+                <!-- `lock-closed mini` icon from https://heroicons.com/, MIT license -->
+                <svg v-if="locked" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                    class="w-4 h-4">
+                    <path fill-rule="evenodd"
+                        d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"
+                        clip-rule="evenodd" />
+                </svg>
+                <!-- `lock-open mini` icon from https://heroicons.com/, MIT license -->
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd"
+                        d="M14.5 1A4.5 4.5 0 0010 5.5V9H3a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-1.5V5.5a3 3 0 116 0v2.75a.75.75 0 001.5 0V5.5A4.5 4.5 0 0014.5 1z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
             <select v-model="activeWorkspace">
                 <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
             </select>
         </div>
-        <DoricFramework
-            :widgets="widgets"
-            :workspace="workspace"
-            :initialState="initialWorkspaceState"
-            @setSharedParameters="setSharedParameters"
-            />
+        <DoricFramework :widgets="widgets" :workspace="workspace" :locked="locked" :initialState="initialWorkspaceState"
+            @setSharedParameters="setSharedParameters" />
     </div>
 </template>
 
@@ -85,9 +97,10 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
     .nav {
         display: flex;
         flex-direction: row;
-        justify-content: end;
-        margin-bottom: 1rem;
+        justify-content: flex-end;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        background-color: #fdfdfd;
         padding: 0.5rem;
     }
-}
-</style>
+}</style>
