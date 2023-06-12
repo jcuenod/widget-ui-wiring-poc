@@ -7,7 +7,7 @@ import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import { DoricFramework } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
-const locked = ref(false)
+const locked = ref(true)
 const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspace = ref("")
 const workspace = ref({})
