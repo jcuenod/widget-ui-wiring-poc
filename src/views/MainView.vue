@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import type { Ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 import widgets from '@/components/doric-widgets/Widgets'
@@ -7,10 +8,11 @@ import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import { DoricFramework, exportWorkspace } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
+const isMounted = ref(false)
 const locked = ref(true)
 const initialWorkspaceState = ref<WidgetInputState[]>([])
-const activeWorkspace = ref("")
-const workspace = ref({})
+const activeWorkspaceId = ref("")
+const workspace: Ref<MinimalWorkspace> = ref([[]])
 
 onMounted(() => {
     // We need the workspace to be set up before we can populate the widget inputs
@@ -21,7 +23,7 @@ onMounted(() => {
             workspaceId = Object.keys(workspaces)[0]
         }
         console.log(`Loading workspace: ${workspaceId}`)
-        activeWorkspace.value = workspaceId
+        activeWorkspaceId.value = workspaceId
         initialWorkspaceState.value = Object.entries(router.currentRoute.value.query)
             .filter(([key]) => key.includes('.'))
             .map(([routerKey, value]) => {
@@ -32,28 +34,34 @@ onMounted(() => {
                     value,
                 }
             })
+        isMounted.value = true
     })
 })
 
-watch(activeWorkspace, (newActiveWorkspace) => {
-    if (!newActiveWorkspace || !(newActiveWorkspace in workspaces)) {
-        console.error(`Invalid workspace: ${newActiveWorkspace}`)
+watch(activeWorkspaceId, (newActiveWorkspaceId) => {
+    if (!newActiveWorkspaceId || !(newActiveWorkspaceId in workspaces)) {
+        console.error(`Invalid workspace: ${newActiveWorkspaceId}`)
         return
     }
-    workspace.value = workspaces[newActiveWorkspace as keyof typeof workspaces]
+    console.log(`Setting workspace: ${newActiveWorkspaceId}`)
+    workspace.value = workspaces[newActiveWorkspaceId as keyof typeof workspaces]
     router.push({
         query: {
-            workspace: newActiveWorkspace,
+            workspace: newActiveWorkspaceId,
         },
     })
 })
 
+// This function is passed into DoricFramework and is called whenever a shared input changes (or is set on init)
 const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParameters: SharedParameters) => {
-    const routerFunction = router.currentRoute.value.query.workspace === activeWorkspace.value
+    if (!isMounted.value) {
+        return
+    }
+    const routerFunction = router.currentRoute.value.query.workspace === activeWorkspaceId.value
         ? router.replace : router.push
     routerFunction({
         query: {
-            workspace: activeWorkspace.value,
+            workspace: activeWorkspaceId.value,
             ...sharedParameters,
         },
     })
@@ -85,7 +93,7 @@ const serializeWorkspace = () => {
                         clip-rule="evenodd" />
                 </svg>
             </button>
-            <select v-if="!locked" v-model="activeWorkspace">
+            <select v-if="!locked" v-model="activeWorkspaceId">
                 <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
             </select>
             <button @click="locked = !locked" class="p-1 m-0 ml-1">
@@ -125,4 +133,5 @@ const serializeWorkspace = () => {
         background-color: #fdfdfd;
         padding: 0.5rem;
     }
-}</style>
+}
+</style>
