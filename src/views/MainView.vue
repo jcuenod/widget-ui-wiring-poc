@@ -17,9 +17,10 @@ onMounted(() => {
     router.isReady().then(() => {
         let workspaceId = router.currentRoute.value.query?.workspace?.toString() || defaultWorkspace
         if (!workspaceId || !(workspaceId in workspaces)) {
+            console.warn(`Invalid workspace ${workspaceId}`)
             workspaceId = Object.keys(workspaces)[0]
-            return
         }
+        console.log(`Loading workspace: ${workspaceId}`)
         activeWorkspace.value = workspaceId
         initialWorkspaceState.value = Object.entries(router.currentRoute.value.query)
             .filter(([key]) => key.includes('.'))
