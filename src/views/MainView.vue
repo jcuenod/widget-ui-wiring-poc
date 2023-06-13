@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
-import { DoricFramework } from 'doric-framework'
+import { DoricFramework, exportWorkspace } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
 const locked = ref(true)
@@ -58,29 +58,50 @@ const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParame
     })
 }
 
+const serializeWorkspace = () => {
+    const serializedWorkspace = JSON.stringify(exportWorkspace())
+    // copy to clipboard
+    navigator.clipboard.writeText(serializedWorkspace)
+        .then(() => {
+            console.log('Copied workspace to clipboard')
+            alert('Serialized workspace to clipboard')
+        })
+        .catch((err) => {
+            console.error('Failed to copy workspace to clipboard', err)
+        })
+}
+
 </script>
 
 <template>
     <div class="App">
         <div class="nav">
-            <button @click="locked = !locked" class="p-1 m-0 mr-1">
+            <button v-if="!locked" @click="serializeWorkspace" class="p-1 m-0 mr-1">
+                <!-- `code-bracket-square` icon from https://heroicons.com/, MIT license -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                    <path fill-rule="evenodd"
+                        d="M4.25 2A2.25 2.25 0 002 4.25v11.5A2.25 2.25 0 004.25 18h11.5A2.25 2.25 0 0018 15.75V4.25A2.25 2.25 0 0015.75 2H4.25zm4.03 6.28a.75.75 0 00-1.06-1.06L4.97 9.47a.75.75 0 000 1.06l2.25 2.25a.75.75 0 001.06-1.06L6.56 10l1.72-1.72zm4.5-1.06a.75.75 0 10-1.06 1.06L13.44 10l-1.72 1.72a.75.75 0 101.06 1.06l2.25-2.25a.75.75 0 000-1.06l-2.25-2.25z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
+            <select v-if="!locked" v-model="activeWorkspace">
+                <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
+            </select>
+            <button @click="locked = !locked" class="p-1 m-0 ml-1">
                 <!-- `lock-closed mini` icon from https://heroicons.com/, MIT license -->
                 <svg v-if="locked" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                    class="w-4 h-4">
+                    class="w-5 h-5">
                     <path fill-rule="evenodd"
                         d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"
                         clip-rule="evenodd" />
                 </svg>
                 <!-- `lock-open mini` icon from https://heroicons.com/, MIT license -->
-                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                     <path fill-rule="evenodd"
                         d="M14.5 1A4.5 4.5 0 0010 5.5V9H3a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-1.5V5.5a3 3 0 116 0v2.75a.75.75 0 001.5 0V5.5A4.5 4.5 0 0014.5 1z"
                         clip-rule="evenodd" />
                 </svg>
             </button>
-            <select v-model="activeWorkspace">
-                <option :key="key" v-for="key in Object.keys(workspaces)">{{ key }}</option>
-            </select>
         </div>
         <DoricFramework :widgets="widgets" :workspace="workspace" :locked="locked" :initialState="initialWorkspaceState"
             @setSharedParameters="setSharedParameters" />
