@@ -25,4 +25,4 @@ export default {
     defaultLabel: "Parallel Highlight",
     widget: ParallelHighlightWidget as Function
   },
-} as WidgetComponentMap
+}

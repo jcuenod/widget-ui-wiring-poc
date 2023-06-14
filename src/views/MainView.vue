@@ -6,13 +6,14 @@ const router = useRouter()
 import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
 import { DoricFramework, exportWorkspace } from 'doric-framework'
+import type { Workspace, SharedParameters, WidgetInputState } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
 const isMounted = ref(false)
 const locked = ref(true)
 const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspaceId = ref("")
-const workspace: Ref<MinimalWorkspace> = ref([])
+const workspace: Ref<Workspace> = ref([])
 
 onMounted(() => {
     // We need the workspace to be set up before we can populate the widget inputs
