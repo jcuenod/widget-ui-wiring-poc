@@ -81,6 +81,29 @@ const workspaces = {
       },
     }],
   ],
+
+  parallel_highlight: [[], [
+    {
+      type: "parallel-highlight-widget", inputs: {
+        words: { value: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Maecenas nec odio et ante tincidunt tempus." }
+      }
+    },
+    {
+      type: "parallel-highlight-widget", inputs: {
+        words: { value: "Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh." }
+      }
+    }], [
+    {
+      type: "parallel-highlight-widget", inputs: {
+        words: { value: "Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris." }
+      }
+    },
+    {
+      type: "parallel-highlight-widget", inputs: {
+        words: { value: "Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus vitae erat rutrum." }
+      }
+    }], []
+  ],
 }
 
 export const defaultWorkspace = "default"
