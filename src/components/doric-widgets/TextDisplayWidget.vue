@@ -1,10 +1,8 @@
 <script setup>
-const props = defineProps({
-  useDoricInput: Function,
-  useDoricOutput: Function
-})
-const osisRef = props.useDoricInput("osisRef")
-const setSelectedLemma = props.useDoricOutput("selectedLemma")
+import { useDoricInput, useDoricOutput } from 'doric-framework'
+
+const osisRef = useDoricInput("osisRef")
+const setSelectedLemma = useDoricOutput("selectedLemma")
 
 // Ignore this -----------------
 // Get some random words to emit to a potential dictionary widget

@@ -5,14 +5,15 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 import widgets from '@/components/doric-widgets/Widgets'
 import workspaces, { defaultWorkspace } from "@/config/workspaces"
-import { DoricFramework, exportWorkspace } from 'doric-framework'
+
+import DoricFramework, { pushWorkspaceState, exportWorkspace } from 'doric-framework'
 import type { Workspace, SharedParameters, WidgetInputState } from 'doric-framework'
 import "doric-framework/dist/style.css"
 
 const isMounted = ref(false)
 const locked = ref(true)
-const initialWorkspaceState = ref<WidgetInputState[]>([])
 const activeWorkspaceId = ref("")
+const initialWorkspaceState = ref<WidgetInputState>([])
 const workspace: Ref<Workspace> = ref([])
 
 onMounted(() => {
@@ -23,7 +24,6 @@ onMounted(() => {
             console.warn(`Invalid workspace ${workspaceId}`)
             workspaceId = Object.keys(workspaces)[0]
         }
-        console.log(`Loading workspace: ${workspaceId}`)
         activeWorkspaceId.value = workspaceId
         initialWorkspaceState.value = Object.entries(router.currentRoute.value.query)
             .filter(([key]) => key.includes('.'))
@@ -46,12 +46,20 @@ watch(activeWorkspaceId, (newActiveWorkspaceId) => {
     }
     console.log(`Setting workspace: ${newActiveWorkspaceId}`)
     workspace.value = workspaces[newActiveWorkspaceId as keyof typeof workspaces]
+
     router.push({
         query: {
             workspace: newActiveWorkspaceId,
         },
     })
 })
+
+const onWorkspaceReady = () => {
+    if (initialWorkspaceState.value) {
+        pushWorkspaceState(initialWorkspaceState.value)
+        initialWorkspaceState.value = []
+    }
+}
 
 // This function is passed into DoricFramework and is called whenever a shared input changes (or is set on init)
 const setSharedParameters = (sharedParameters: SharedParameters, oldSharedParameters: SharedParameters) => {
@@ -113,8 +121,8 @@ const serializeWorkspace = () => {
                 </svg>
             </button>
         </div>
-        <DoricFramework :widgets="widgets" :workspace="workspace" :locked="locked" :initialState="initialWorkspaceState"
-            @setSharedParameters="setSharedParameters" />
+        <DoricFramework :widgets="widgets" :workspace="workspace" :locked="locked"
+            @setSharedParameters="setSharedParameters" @onWorkspaceReady="onWorkspaceReady" />
     </div>
 </template>
 
@@ -123,13 +131,12 @@ const serializeWorkspace = () => {
     display: flex;
     flex-direction: column;
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
 
     .nav {
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
-        margin-bottom: 0.5rem;
         border-bottom: 1px solid #eee;
         background-color: #fdfdfd;
         padding: 0.5rem;

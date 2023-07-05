@@ -1,10 +1,7 @@
 <script setup>
-const props = defineProps({
-  useDoricOutput: Function,
-  useDoricInput: Function
-})
-const setOsisRef = props.useDoricOutput("osisRef")
-const osisRef = props.useDoricInput("osisRef")
+import { useDoricInput, useDoricOutput } from 'doric-framework'
+const setOsisRef = useDoricOutput("osisRef")
+const osisRef = useDoricInput("osisRef")
 </script>
 
 <template>

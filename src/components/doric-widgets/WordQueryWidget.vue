@@ -6,19 +6,26 @@
 </template>
   
 <script>
+import { useDoricInput, useDoricOutput } from 'doric-framework'
+
 export default {
     data() {
         return {
-            osisRef: this.useDoricInput("osisRef"),
-            selectedLemma: this.useDoricInput("selectedLemma")
+            osisRef: useDoricInput("osisRef"),
+            selectedLemma: useDoricInput("selectedLemma")
         }
     },
-    created() {
-        // Define input methods
-        this.submitOsisRef = this.useDoricOutput("osisRef")
-        this.submitSelectedLemma = this.useDoricOutput("selectedLemma")
+    // /* Alternative to using `setup()` */
+    // created() {
+    //     this.submitOsisRef = useDoricOutput("osisRef")
+    //     this.submitSelectedLemma = useDoricOutput("selectedLemma")
+    // },
+    setup() {
+        return {
+            submitOsisRef: useDoricOutput("osisRef"),
+            submitSelectedLemma: useDoricOutput("selectedLemma")
+        }
     },
-    props: ['useDoricOutput', 'useDoricInput'],
 }
 </script>
   
